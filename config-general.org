@@ -1907,3 +1907,4 @@ undo-tree-auto-save-history is nil otherwise desktop-read might fail and therfor
     (add-to-list 'which-key-replacement-alist '(("insert"    . nil) . ("⎀" . nil)))
     (which-key-mode))
 #+END_SRC
+
