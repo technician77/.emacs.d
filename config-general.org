@@ -1,4 +1,4 @@
-* Initialization
+* *Initialization*
 ** Directory creation if needed
 *** home folder
 #+BEGIN_SRC emacs-lisp
@@ -58,7 +58,7 @@ Bind-Key is pulled as a dependency.
   (setq use-package-verbose t)
   (setq use-package-always-ensure t)
 #+END_SRC
-* C-Core
+* *C-Core*
 #+BEGIN_SRC emacs-lisp
   (use-package emacs
     :ensure nil
@@ -124,7 +124,7 @@ Bind-Key is pulled as a dependency.
     (defalias 'yes-or-no-p 'y-or-n-p)
     (set-fontset-font t 'unicode "Symbola" nil 'prepend))
 #+END_SRC
-* Built-in
+* *Built-in*
 ** Packages
 Pay attention when configuring :defer t, loading might be required.
 *** Auto-Revert
@@ -1062,7 +1062,7 @@ Used for temp.txt
       (kill-buffer old)
       (kill-buffer new)))
 #+end_src
-* Manual
+* *Manual*
 ** Initialization
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'load-path "~/.emacs.d/myscripts/")
@@ -1074,7 +1074,7 @@ Used for temp.txt
     :config
     (fakecygpty-activate))
 #+END_SRC
-* External
+* *External*
 ** All-the-icons
 *** All-the-icons-dired
 #+BEGIN_SRC emacs-lisp
