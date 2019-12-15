@@ -1,0 +1,125 @@
+* Windows User-Variables Registration
+Variables can be deleted/registered using the GUI under System/Advanced System settings/Environment Variables
+** New Variables
+setx HOME C:\home\MyUser\
+setx EMACS C:\MyPathToMyPortableSoftware\Emacs
+setx EMACS_SERVER_FILE C:\home\MyUser\.emacs.d\server\server
+setx DICPATH C:\msys64\mingw64\share\myspell\dicts\
+setx INFOPATH C:\msys64\usr\share\info;%EMACS%\share\info
+setx JAVA_HOME C:\ProgramData\Oracle\Java\javapath
+setx GHOSTSCRIPT C:\Program Files\gs\gs9.XX
+** Add to User-PATH
+%EMACS%\bin\
+C:\msys64\mingw64\bin\
+C:\msys64\usr\bin\
+C:\Program Files (x86)\Graphviz\bin\
+C:\MyPathToMyPortableSoftware\\Ripgrep\
+C:\MyPathToMyPortableSoftware\Fakecygpty\
+C:\MyPathToMyPortableSoftware\EPDFInfo\
+C:\MyPathToMyPortableSoftware\Bind-Tools\
+* Configuration
+** Specific directories and executables
+#+BEGIN_SRC emacs-lisp
+  (defconst my-relative-directory-org-ditaa-jar-path "C:/MyPathToMyPortableSoftware/Ditaa/")
+  (defconst my-relative-directory-org-agenda-files '("~/org/example.org"))
+  (defconst my-relative-ghostscript-program "C:/Program Files/gs/gs9.50/bin/gswin64c.exe")
+#+END_SRC
+** Ibuffer-Filter-Groups
+#+BEGIN_SRC emacs-lisp
+  (defconst my-relative-ibuffer-saved-filter-groups
+    (quote (("default"
+             ("Productive" (or
+                            (name . "example.org\\(<[0-9]+>\\)?$")))
+             ("Temp" (or
+                      (name . "^\\*temp.txt\\*$")
+                      (name . "^\\*temp-[0-9]\\*$")))
+             ("Plan/Journal" (or
+                              (name . "^\\*Calendar\\*$")
+                              (name . "^\\*wclock\\*$")
+                              (name . "^\\*chronos\\*$")
+                              (name . "journal.org\\(<[0-9]+>\\)?$")
+                              (name . "^diary.txt$")
+                              (name . "^timelog.txt$")
+                              (name . "^\\*Holidays\\*$")))
+             ("Contacts" (or
+                          (name . "^\\*BBDB\\*$")
+                          (name . "bbdb\\(<[0-9]+>\\)?$")
+                          (name . "contacts.org\\(<[0-9]+>\\)?$")))
+             ("Dired" (or
+                       (mode . dired-mode)
+                       (mode . image-dired)))
+             ("Emacs Configuration" (or
+                                     (name . "config-general.org\\(<[0-9]+>\\)?$")
+                                     (name . "config-specific-example.org\\(<[0-9]+>\\)?$")
+                                     (name . "instructions.org\\(<[0-9]+>\\)?$")
+                                     (name . "custom.el\\(<[0-9]+>\\)?$")
+                                     (name . "abbrev_defs.el\\(<[0-9]+>\\)?$")
+                                     (name . "init.el\\(<[0-9]+>\\)?$")
+                                     (name . "macros.el\\(<[0-9]+>\\)?$")
+                                     (name . "CurrentlyNotInUse.org\\(<[0-9]+>\\)?$")))
+             ("Emacs Special" (or
+                               (name . "^\\*Apropos\\*$")
+                               (name . "^\\*Backtrace\\*$")
+                               (name . "^\\*Bookmark List\\*$")
+                               (name . "^\\*Compile-Log\\*$")
+                               (name . "^\\*compilation\\*$")
+                               (name . "^\\*CPU-Profiler-Report")
+                               (name . "^\\*Customize")
+                               (name . "^\\*Ediff Registry*\\*$")
+                               (name . "^\\*Help\\*$")
+                               (name . "^\\*Info\\*$")
+                               (name . "^\\*log-edit-files\\*$")
+                               (name . "^\\*Messages\\*$")
+                               (name . "^\\*Occur\\*$")
+                               (name . "^\\*Open Recent\\*$")
+                               (name . "^\\*Packages\\*$")
+                               (name . "^\\*Personal Keybindings\\*$")
+                               (name . "^\\*Proced\\*$")
+                               (name . "^\\*Register List\\*$")
+                               (name . "^\\*scratch\\*$")
+                               (name . "^\\*shell\\*$")
+                               (name . "^\\*Shell Command Output*\\*$")
+                               (name . "^\\*Warnings\\*$")))
+             ("Development" (or
+                             (name . "development.org\\(<[0-9]+>\\)?$")
+                             (name . "^\\TAGS$")))
+             ("Manuals"  (or
+                          (name . "^\\*Man")
+                          (name . "^\\*WoMan")))
+             ("Markdown" (or
+                          (mode . markdown-mode)
+                          (mode . gfm-mode)))
+             ("Misc Configuration Files" (or
+                                          (name . "tmux.conf\\(<[0-9]+>\\)?$")
+                                          (name . ".bashrc\\(<[0-9]+>\\)?$")))
+             ("Org-Mode specific" (or
+                                   (name . "^\\*Org Agenda\\*$")
+                                   (name . "^\\*Org Lint\\*$")))
+             ("Org-Journal" (or
+                             (mode . org-journal-mode)))
+             ("Presentation-Templates" (or
+                                        (name . "presentation-html.org\\(<[0-9]+>\\)?$")
+                                        (name . "presentation-org-beamer.org\\(<[0-9]+>\\)?$")
+                                        (name . "presentation-org-reveal.org\\(<[0-9]+>\\)?$")))
+             ("Version Control" (or
+                                 (name . "^\\*Annotate")
+                                 (name . "^\\*magit")
+                                 (name . "^\\*svn-")
+                                 (name . "^\\*vc\\*$")
+                                 (name . "^\\*vc-")))
+             ("Weather" (name . "^\\*wttr.in"))
+             ("Web Development" (or
+                                 (mode . web)))
+             ("Yankpad" (name . "yankpad.org\\(<[0-9]+>\\)?$"))
+             ))))
+#+END_SRC
+** Ivy-Views
+#+BEGIN_SRC emacs-lisp
+  (defconst my-ivy-views'(
+                          ("{} Foo + Bar"
+                           (horz
+                            (file "~/org/active/foo.org")
+                            (file "~/org/active/bar.org")
+                            ))
+                          ))
+#+END_SRC
