@@ -2,20 +2,34 @@
 Variables can be deleted/registered using the GUI under System/Advanced System settings/Environment Variables
 ** New Variables
 setx HOME C:\home\MyUser\
+
 setx EMACS C:\MyPathToMyPortableSoftware\Emacs
+
 setx EMACS_SERVER_FILE C:\home\MyUser\.emacs.d\server\server
+
 setx DICPATH C:\msys64\mingw64\share\myspell\dicts\
+
 setx INFOPATH C:\msys64\usr\share\info;%EMACS%\share\info
+
 setx JAVA_HOME C:\ProgramData\Oracle\Java\javapath
+
 setx GHOSTSCRIPT C:\Program Files\gs\gs9.XX
+
 ** Add to User-PATH
 %EMACS%\bin\
+
 C:\msys64\mingw64\bin\
+
 C:\msys64\usr\bin\
+
 C:\Program Files (x86)\Graphviz\bin\
+
 C:\MyPathToMyPortableSoftware\\Ripgrep\
+
 C:\MyPathToMyPortableSoftware\Fakecygpty\
+
 C:\MyPathToMyPortableSoftware\EPDFInfo\
+
 C:\MyPathToMyPortableSoftware\Bind-Tools\
 * Configuration
 ** Specific directories and executables
@@ -118,8 +132,8 @@ C:\MyPathToMyPortableSoftware\Bind-Tools\
   (defconst my-ivy-views'(
                           ("{} Foo + Bar"
                            (horz
-                            (file "~/org/active/foo.org")
-                            (file "~/org/active/bar.org")
+                            (file "~/org/foo.org")
+                            (file "~/org/bar.org")
                             ))
                           ))
 #+END_SRC
