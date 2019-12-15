@@ -7,6 +7,8 @@ setx EMACS C:\MyPathToMyPortableSoftware\Emacs
 
 setx EMACS_SERVER_FILE C:\home\MyUser\.emacs.d\server\server
 
+setx EDITOR emacsclient
+
 setx DICPATH C:\msys64\mingw64\share\myspell\dicts\
 
 setx INFOPATH C:\msys64\usr\share\info;%EMACS%\share\info
