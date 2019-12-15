@@ -1240,6 +1240,7 @@ C-g: abort
     (evil-tutor-start evil-tutor-resume))
 #+END_SRC
 ** Forge
+Execute forge-pull for first init.
 #+BEGIN_SRC emacs-lisp
   (use-package forge
     :after magit)
@@ -1385,6 +1386,10 @@ The wrapping is needed to avoid "free variable"
 #+END_SRC
 ** Magit
 Before installation and before using start a msys2 shell. It seems that this sets some values for magit to work correctly in order to find and use the git executable. Setting it in emacs will not work sufficiently.
+*Basic usage:*
+(magit-status), then (s)tage,(c)ommit,(c)ommit,Enter changetext,C-c,C-c
+*Push to github:*
+As above, but add (P)ush,(p)ush
 #+BEGIN_SRC emacs-lisp
   (use-package magit
     :bind
