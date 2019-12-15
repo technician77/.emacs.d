@@ -1,0 +1,1909 @@
+* Initialization
+** Directory creation if needed
+*** home folder
+#+BEGIN_SRC emacs-lisp
+  (when (not (file-exists-p "~/compile"))
+    (make-directory "~/compile"))
+
+  (when (not (file-exists-p "~/git"))
+    (make-directory "~/git"))
+
+  (when (not (file-exists-p "~/links"))
+    (make-directory "~/links"))
+
+  (when (not (file-exists-p "~/org"))
+    (make-directory "~/org"))
+
+  (when (not (file-exists-p "~/org/archive"))
+    (make-directory "~/org/archive"))
+
+  (when (not (file-exists-p "~/temp"))
+    (make-directory "~/temp"))
+
+  (when (not (file-exists-p "~/test"))
+    (make-directory "~/test"))
+
+  (when (not (file-exists-p "~/tex"))
+    (make-directory "~/tex"))
+#+END_SRC
+*** .emacs.d
+#+BEGIN_SRC emacs-lisp
+  (when (not (file-exists-p "~/.emacs.d/auto-save-list"))
+    (make-directory "~/.emacs.d/auto-save-list"))
+
+  (when (not (file-exists-p "~/.emacs.d/backup"))
+    (make-directory "~/.emacs.d/backup"))
+
+  (when (not (file-exists-p "~/.emacs.d/myscripts"))
+    (make-directory "~/.emacs.d/myscripts"))
+
+  (when (not (file-exists-p "~/.emacs.d/server"))
+    (make-directory "~/.emacs.d/server"))
+
+  (when (not (file-exists-p "~/.emacs.d/undo-tree"))
+    (make-directory "~/.emacs.d/undo-tree"))
+#+END_SRC
+** Use-Package+Bind-Key
+Bind-Key is pulled as a dependency.
+#+BEGIN_SRC emacs-lisp
+  (unless (package-installed-p 'use-package)
+    (package-refresh-contents)
+    (package-install 'use-package))
+  (unless (package-installed-p 'use-package-ensure-system-package)
+    (package-refresh-contents)
+    (package-install 'use-package-ensure-system-package))
+  (eval-when-compile
+    (require 'use-package))
+  (require 'bind-key)
+  (setq use-package-verbose t)
+  (setq use-package-always-ensure t)
+#+END_SRC
+* C-Core
+#+BEGIN_SRC emacs-lisp
+  (use-package emacs
+    :ensure nil
+    :bind
+    ("<f12> c" . calendar)
+    ("M-s s" . write-region) ; Save region to file
+    ("s-9" . abort-recursive-edit) ; Replacement for "M-]", which does not work on German keyboards
+    ("s-e" . eval-region)
+    ("s-k" . kill-buffer)
+    ("s-<backspace>" . my-save-whole-line)
+    ("s-c l" . my-mark-line)
+    ("s-c p" . my-insert-page-break)
+    ("s-c t" . my-timestamper)
+    ("s-c m" . my-save-macro)
+    ("s-c u" . my-update-locatedb)
+    ("s-c n" . my-search-near)
+    ("s-c d" . my-diff-last-two-kills)
+    ("s-c ß" . my-toggle-transparency)
+    :custom
+    (temporary-file-directory "~/temp")
+    (delete-by-moving-to-trash t)
+    (echo-keystrokes 0.02)
+    (history-delete-duplicates t)
+    (make-pointer-invisible t)
+    (scroll-conservatively 101)
+    (visible-bell t)
+    (tool-bar-mode nil)
+    (delete-by-moving-to-trash t)
+    (x-stretch-cursor t)
+    (shell-file-name "bash") ; Do not change to absolute path or you will get 'unknown terminal "emacs"' error when quiting the terminal.
+    (minibuffer-prompt-properties (quote (read-only t cursor-intangible t))) ;Prevent point from ever entering prompt
+    (window-combination-resize t)
+    (load-prefer-newer t)
+    (scroll-margin 10)
+    (fill-column 80)
+    (indent-tabs-mode nil)
+    (tab-always-indent 'complete)
+    (tab-width 4)
+    (major-mode 'text-mode)
+    :config
+    ;; ### Keyboard related ###
+    (setq w32-pass-rwindow-to-system nil)
+    (setq w32-apps-modifier 'super)
+    (setq w32-rwindow-modifier 'hyper) ; Apps equals context menu button.
+    (w32-register-hot-key [s-])
+    (w32-register-hot-key [H-])
+    (define-key input-decode-map [?\C-i] [C-i]) ; This causes Emacs not to interpret C-i as TAB.
+    (define-key input-decode-map [?\C-m] [C-m]) ; This causes Emacs not to interpret C-m as RET.
+    (global-unset-key (kbd "<f11>"))
+    ;; ### Disabled commands activation ###
+    (put 'dired-find-alternate-file 'disabled nil)
+    (put 'narrow-to-region 'disabled nil)
+    (put 'narrow-to-page 'disabled nil)
+    (put 'erase-buffer 'disabled nil)
+    (put 'scroll-left 'disabled nil)
+    (put 'downcase-region 'disabled nil)
+    (put 'upcase-region 'disabled nil)
+    ;; ### Misc ###
+    (setq frame-title-format '("%b" "   " buffer-file-name))
+    (setq system-time-locale "de_DE.utf8")
+    (setq auto-window-vscroll nil)
+    (setq left-margin-width 1 right-margin-width 1)
+    (defalias 'yes-or-no-p 'y-or-n-p)
+    (set-fontset-font t 'unicode "Symbola" nil 'prepend))
+#+END_SRC
+* Built-in
+** Packages
+Pay attention when configuring :defer t, loading might be required.
+*** Auto-Revert
+#+BEGIN_SRC emacs-lisp
+  (use-package autorevert
+    :ensure nil
+    :config
+    (global-auto-revert-mode))
+#+END_SRC
+*** Abbreviation
+#+BEGIN_SRC emacs-lisp
+  (use-package abbrev
+    :ensure nil
+    :custom
+    (abbrev-file-name "~/.emacs.d/abbrev_defs.el")
+    :config
+    (abbrev-mode))
+#+END_SRC
+*** Appointments
+#+BEGIN_SRC emacs-lisp
+  (use-package appt
+    :ensure nil
+    :after
+    (diary-lib)
+    :custom
+    (appt-message-warning-time 15)
+    :config
+    (appt-activate))
+#+END_SRC
+*** Ansi-Color
+#+BEGIN_SRC emacs-lisp
+  (use-package ansi-color
+    :ensure nil
+    :defer t
+    :custom
+    (ansi-color-for-comint-mode 'filter))
+#+END_SRC
+*** Bookmark
+#+BEGIN_SRC emacs-lisp
+  (use-package bookmark
+    :ensure nil
+    :custom
+    (bookmark-file "~/.emacs.d/bookmarks.txt")
+    :bind
+    (("<f9> l" . bookmark-bmenu-list)
+     ("<f9> s" . bookmark-set)))
+#+END_SRC
+*** Calendar
+#+BEGIN_SRC emacs-lisp
+  (use-package calendar
+    :ensure nil
+    :bind
+    ("<f12> c" . calendar)
+    :custom
+    (diary-file "~/.emacs.d/diary.txt")
+    (calendar-mark-diary-entries-flag t)
+    (calendar-mark-holidays-flag t)
+    (calendar-date-style (quote iso) "was european before")
+    (calendar-week-start-day 1)
+    (calendar-day-name-array ["Sonntag" "Montag" "Dienstag" "Mittwoch" "Donnerstag" "Freitag" "Samstag"])
+    (calendar-day-header-array ["So" "Mo" "Di" "Mi" "Do" "Fr" "Sa"])
+    (calendar-month-name-array ["Januar" "Februar" "März" "April" "Mai" "Juni" "Juli" "August" "September" "Oktober" "November" "Dezember"]))
+#+END_SRC
+*** Cal-DST
+#+BEGIN_SRC emacs-lisp
+  (use-package cal-dst
+    :ensure nil
+    :defer t
+    :custom
+    (calendar-time-zone 60))
+#+END_SRC
+*** Comint
+#+BEGIN_SRC emacs-lisp
+  (use-package comint
+    :ensure nil
+    :custom
+    (comint-prompt-read-only t)
+    (comint-scroll-to-bottom-on-input t)
+    (comint-scroll-to-bottom-on-output t)
+    (comint-move-point-for-output t)
+    (comint-completion-autolist t)
+    (comint-input-ignoredups t)
+    :config
+    ; Can't be initialized via :hook since it doesn't end with -hook
+    ; Also this hook adds a value to the comint-output-filter-functions variable
+    (add-hook 'comint-output-filter-functions 'comint-strip-ctrl-m)
+    (add-hook 'comint-output-filter-functions 'comint-watch-for-password-prompt)
+    (add-hook 'comint-output-filter-functions 'ansi-color-process-output))
+#+END_SRC
+*** Compile
+#+BEGIN_SRC emacs-lisp
+  (use-package compile
+    :ensure nil
+    :hook
+    (compilation-filter . my-colorize-compilation-buffer))
+#+END_SRC
+*** Cua-Base
+#+BEGIN_SRC emacs-lisp
+  (use-package cua-base
+    :ensure nil
+    :custom
+    (cua-auto-tabify-rectangles nil)
+    :config
+    (cua-mode))
+#+END_SRC
+*** Cua-Rectangle
+#+BEGIN_SRC emacs-lisp
+  (use-package cua-rect
+    :ensure nil
+    :bind 
+    ("<s-return>" . cua-rectangle-mark-mode))
+#+END_SRC
+*** Cus-edit
+#+BEGIN_SRC emacs-lisp
+  (use-package cus-edit
+    :ensure nil
+    :custom
+    (custom-file "~/.emacs.d/custom.el")
+    (custom-buffer-done-kill t)
+    :config
+    (load custom-file))
+#+END_SRC
+*** Custom
+#+BEGIN_SRC emacs-lisp
+  (use-package custom
+    :ensure nil
+    :defer t
+    :config
+    (load-theme 'tango-dark t))
+#+END_SRC
+*** Desktop
+#+BEGIN_SRC emacs-lisp
+  (use-package desktop
+    :ensure nil
+    :custom
+    (desktop-base-file-name "emacs-desktop.el")
+    :config
+    (desktop-save-mode))
+#+END_SRC
+*** Diary
+#+BEGIN_SRC emacs-lisp
+  (use-package diary-lib
+    :ensure nil
+    :bind
+    ("<f12> d" . diary))
+#+END_SRC
+*** Diff-Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package diff-mode
+    :ensure nil
+    :defer t
+    :custom
+    (diff-font-lock-prettify t))    
+#+END_SRC
+*** Dired
+#+BEGIN_SRC emacs-lisp
+  (use-package dired
+    :ensure nil
+    :commands
+    (dired)
+    :bind
+    ("<f8>" . dired)
+    (
+    :map dired-mode-map
+         ("<RET>" . dired-find-alternate-file) ; reuses buffer instead of opening a new
+         ("<DEL>" . dired-up-directory) ; was dired-unmark-backward
+         ("a" . dired-find-file))  ; was swapped with <RET>
+    :custom
+    (dired-dwim-target t)
+    (dired-auto-revert-buffer t)
+    (dired-listing-switches "-alh")
+    :hook
+    (dired-mode . dired-hide-details-mode)
+    (dired-after-readin . (lambda () (rename-buffer (generate-new-buffer-name dired-directory)))))
+#+END_SRC
+*** Display-Line-Numbers
+Relative line Numbers cause flickering due to redisplaying
+#+BEGIN_SRC emacs-lisp
+  (use-package display-line-numbers
+    :bind 
+    ("<f12> n" . display-line-numbers-mode)
+    :hook
+    (prog-mode . display-line-numbers-mode)
+    (text-mode . display-line-numbers-mode)
+    (org-mode . (lambda () (display-line-numbers-mode -1))))
+#+END_SRC
+*** Doc-View
+#+BEGIN_SRC emacs-lisp
+  (use-package doc-view
+    :ensure nil
+    :defer t
+    :custom
+    (doc-view-resolution 200)
+    (doc-view-ghostscript-program (symbol-value 'my-relative-ghostscript-program)))
+#+END_SRC
+*** Ediff
+#+BEGIN_SRC emacs-lisp
+  (use-package ediff
+    :ensure nil
+    :defer t
+    :custom
+    (ediff-split-window-function (quote split-window-horizontally))
+    (ediff-window-setup-function (quote ediff-setup-windows-plain))
+    :custom-face
+    (ediff-current-diff-A ((t :background "green")))
+    (ediff-current-diff-Ancestor ((t :background "#bebebe")))
+    (ediff-current-diff-B ((t :background "red")))
+    (ediff-current-diff-C ((t :background "blue")))
+    (ediff-even-diff-A ((t :background "#006400")))
+    (ediff-even-diff-Ancestor ((t :background "#4d4d4d")))
+    (ediff-even-diff-B ((t :background "#8b0000")))
+    (ediff-even-diff-C ((t :background "#00008b")))
+    (ediff-fine-diff-A ((t :background "#6b8e23")))
+    (ediff-fine-diff-Ancestor ((t :background "#d3d3d3")))
+    (ediff-fine-diff-B ((t :background "#cd5c5c")))
+    (ediff-fine-diff-C ((t :background "cyan")))
+    (ediff-odd-diff-A ((t :background "#228b22")))
+    (ediff-odd-diff-Ancestor ((t :background "#a9a9a9")))
+    (ediff-odd-diff-B ((t :background "#b22222")))
+    (ediff-odd-diff-C ((t :background "#87ceeb"))))
+#+END_SRC
+*** Env
+#+BEGIN_SRC emacs-lisp
+  (use-package env
+    :ensure nil
+    :config
+    (setenv "LANG" "de_DE.utf8")
+    (setenv "LC_ALL" "de_DE.utf8")
+    (setenv "SHELL" "bash") ; Required for indentation setup bash instead sh
+    (setenv "DICTIONARY" "de_DE"))
+#+END_SRC
+*** Eshell
+EM-Term must be customed or setq this way in order to avoid error, since variable is not available before loading.
+#+BEGIN_SRC emacs-lisp
+  (use-package eshell
+    :ensure nil
+    :bind
+    ("<f12> e" . eshell))
+  (use-package em-term
+    :ensure nil
+    :after eshell
+    :custom
+    (eshell-visual-commands '("vi" "screen" "top" "less" "more" "lynx" "ncftp" "pine" "tin" "trn" "elm" "ssh" "tail")))
+#+END_SRC
+*** Faces
+#+BEGIN_SRC emacs-lisp
+  (use-package faces
+    :ensure nil
+    :custom-face
+    (default ((t :family "Source Code Pro" :background "black" :foreground "white" :foundry "outline" :slant normal :weight normal :height 143 :width normal)))
+    (region ((t :background "#2f4f4f")))
+    (link ((t :foreground "#98fb98" :underline t)))
+    (mode-line ((t :foreground "white" :background "#212526" :box nil :weight extralight)))
+    (header-line ((t :background "#212526")))
+    (fringe ((t :foreground "white" :background "#212526"))))
+#+END_SRC
+*** Face-Remap
+#+BEGIN_SRC emacs-lisp
+  (use-package face-remap
+    :ensure nil
+    :bind 
+    (("<s-wheel-down>" . text-scale-increase)
+     ("<s-wheel-up>" . text-scale-decrease)))
+#+END_SRC
+*** Files
+write-file ~= save as
+#+BEGIN_SRC emacs-lisp
+  (use-package files
+    :ensure nil
+    :bind
+    (("s-s" . save-buffer)
+     ("<M-f4>" . save-buffers-kill-emacs))
+    :custom
+    (require-final-newline t)
+    (delete-old-versions t)
+    (kept-new-versions 10)
+    (kept-old-versions 0)
+    (version-control t)
+    (auto-save-file-name-transforms '(("\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"  "~/.emacs.d/auto-save/" t)))
+    (backup-by-copying t)
+    (backup-directory-alist '((".*" . "~/.emacs.d/backup/")))
+    :config
+    (load-file "~/.emacs.d/macros.el"))
+#+END_SRC
+*** Flyspell
+#+BEGIN_SRC emacs-lisp
+  (use-package flyspell
+    :ensure nil
+    :bind
+    ("s-l b" . flyspell-buffer)
+    ("s-l w" . flyspell-word)
+    ("s-l r" . flyspell-region))
+#+END_SRC
+*** Frame
+#+BEGIN_SRC emacs-lisp
+  (use-package frame
+    :ensure nil
+    :bind
+    (("<s-kp-5>" . make-frame-command)
+     ("<s-prior>" . previous-multiframe-window)
+     ("<s-next>" . next-multiframe-window)
+     ("<s-<f12>" . toggle-frame-fullscreen)
+     ("M-s-o" . other-frame))
+    :custom
+    (blink-cursor-blinks 5))
+#+END_SRC
+*** Fringe
+#+BEGIN_SRC emacs-lisp
+  (use-package fringe
+    :ensure nil
+    :config
+    (fringe-mode 16))
+#+END_SRC
+*** Gnu-TLS
+#+BEGIN_SRC emacs-lisp
+  (use-package gnutls
+    :ensure nil
+    :custom
+    (gnutls-verify-error :trustfiles)
+    (gnutls-min-prime-bits 2048))
+#+END_SRC
+*** Help
+#+BEGIN_SRC emacs-lisp
+  (use-package help
+    :ensure nil
+    :bind
+    ("<f12> k" . describe-bindings))
+#+END_SRC
+*** Hippie-Expand
+#+BEGIN_SRC emacs-lisp
+  (use-package hippie-exp
+    :ensure nil
+    :bind 
+    ("s-h" . hippie-expand)
+    :custom
+    (hippie-expand-try-functions-list '(try-expand-dabbrev
+                                        try-expand-dabbrev-all-buffers
+                                        try-expand-dabbrev-from-kill
+                                        try-complete-file-name
+                                        try-complete-file-name-partially
+                                        try-expand-all-abbrevs
+                                        try-expand-list
+                                        try-expand-line
+                                        try-complete-lisp-symbol-partially
+                                        try-complete-lisp-symbol)))
+#+END_SRC
+*** Highlight Line
+#+BEGIN_SRC emacs-lisp
+  (use-package hl-line
+    :ensure nil
+    :defer t
+    :custom-face
+    (hl-line ((nil :foreground "black" :background "yellow"))))
+#+END_SRC
+*** Ibuffer
+**** Main
+#+BEGIN_SRC emacs-lisp
+  (use-package ibuffer
+  :ensure nil
+  :bind
+  (("<f6>" . ibuffer-jump)
+   :map ibuffer-mode-map
+   ("z" . my-ibuffer-open-in-desktop))
+  :custom
+  (ibuffer-expert t)
+  (ibuffer-default-sorting-mode 'alphabetic)
+  ;related to size-h definition beleow
+  (ibuffer-formats
+   '((mark modified read-only " "
+           (name 18 18 :left :elide)
+           " "
+           (size-h 9 -1 :right)
+           " "
+           (mode 16 16 :left :elide)
+           " "
+           filename-and-process)))
+  :config
+  (defun my-ibuffer-open-in-desktop ()
+    "Call `open-in-desktop' on current or marked buffers."
+    (interactive)
+    (if (ibuffer-marked-buffer-names)
+        (ibuffer-do-open-in-desktop)
+      (let ((buf (ibuffer-current-buffer t)))
+        (unless buf
+          (error "No live buffer at point."))
+        (with-current-buffer buf
+          (my-open-in-desktop)))))
+  :hook
+  ;- Switch to saved filter groups when opening default, update list automatically
+  (ibuffer-mode . (lambda () (ibuffer-auto-mode 1) (ibuffer-switch-to-saved-filter-groups "default")))
+  ;- Forces Ibuffer to use other window when pressing o instead of opening a new one
+  (ibuffer-mode . (lambda () (setq-local display-buffer-base-action '(display-buffer-use-some-window)))))
+#+END_SRC
+**** Define Ibuffer-do-open-in-desktop command and Human-readable size (size-h)
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load "ibuffer"
+    (define-ibuffer-op open-in-desktop ()
+      "Call `open-in-desktop' on current or marked buffers."
+      (:opstring "opened" :modifier-p :maybe)
+      (open-in-desktop))
+    (define-ibuffer-column size-h
+      (:name "Size" :inline t)
+      (cond
+       ((> (buffer-size) 1000000) (format "%7.1fM" (/ (buffer-size) 1000000.0)))
+       ((> (buffer-size) 100000) (format "%7.0fk" (/ (buffer-size) 1000.0)))
+       ((> (buffer-size) 1000) (format "%7.1fk" (/ (buffer-size) 1000.0)))
+       (t (format "%8d" (buffer-size))))))
+#+END_SRC
+*** Ibuffer-Extension
+#+BEGIN_SRC emacs-lisp
+  (use-package ibuf-ext
+    :ensure nil
+    :defer t
+    :custom
+    (ibuffer-show-empty-filter-groups nil)
+    (ibuffer-saved-filter-groups (symbol-value 'my-relative-ibuffer-saved-filter-groups)))
+#+END_SRC
+*** Info
+#+BEGIN_SRC emacs-lisp
+  (use-package info
+    :ensure nil
+    :bind
+    ("<f12> i" . info)
+    :mode
+    ("\\.info\\'" . Info-mode))
+#+END_SRC
+*** Ispell
+#+BEGIN_SRC emacs-lisp
+  (use-package ispell
+    :ensure nil
+    :ensure-system-package ((hunspell . "pacman -S hunspell"))
+    :bind
+    ("s-i c" . ispell-change-dictionary)
+    ("s-i r" . ispell-region)
+    ("s-i w" . ispell-wordd)
+    ("s-i b" . ispell-buffer)
+    :custom
+    (ispell-silently-savep t)
+    (ispell-dictionary "deutsch")
+   ;(ispell-program-name "aspell") ; Uncomment to switch to Aspell
+   ;(ispell-extra-args '("--sug-mode=ultra" "--lang=de_DE")) ; Uncomment to switch to Aspell
+   )
+#+END_SRC
+*** Misc
+#+BEGIN_SRC emacs-lisp
+  (use-package misc
+    :ensure nil
+    :bind
+    (("<S-s-right>" . my-copy-from-above-1cf)
+     ("<S-s-left>" . my-copy-from-above-1cb)
+     ("<S-s-down>" . my-copy-from-above-open-line)
+     ("<S-s-up>" . copy-from-above-command))
+    :config
+    (defun my-copy-from-above-1cf ()
+      (interactive)
+      (copy-from-above-command 1))
+    (defun my-copy-from-above-1cb ()
+      (interactive)
+      (copy-from-above-command -1)
+      (forward-char -1)
+      (delete-char -1))
+    (defun my-copy-from-above-open-line ()
+      (interactive)
+      (forward-line 1)
+      (open-line 1)
+      (copy-from-above-command)))
+#+END_SRC
+*** Mouse
+#+BEGIN_SRC emacs-lisp
+  (use-package mouse
+    :ensure nil
+    :defer t
+    :custom
+    (mouse-drag-and-drop-region t)
+    (mouse-drag-and-drop-region-show-tooltip nil))
+#+END_SRC
+*** Mouse-Wheel
+#+BEGIN_SRC emacs-lisp
+  (use-package mwheel
+    :ensure nil
+    :defer t
+    :custom
+    (mouse-wheel-progressive-speed nil)
+    (mouse-wheel-scroll-amount '(1 ((shift)  . 1) ((meta)) ((control) . text-scale))))
+#+END_SRC
+*** Mule-Commands
+#+BEGIN_SRC emacs-lisp
+  (use-package mule
+    :ensure nil
+    :config
+    (set-language-environment 'German)
+    (prefer-coding-system 'utf-8))
+#+END_SRC
+*** Network-Security-Manager
+#+BEGIN_SRC emacs-lisp
+  (use-package nsm
+    :ensure nil
+    :defer t
+    :custom
+    (network-security-level 'high))
+#+END_SRC
+*** Package
+#+BEGIN_SRC emacs-lisp
+  (use-package package
+    :ensure nil
+    :bind
+    ("<f12> u" . package-list-packages)
+    :custom
+    (package-archives
+     '(
+       ("gnu" . "https://elpa.gnu.org/packages/")
+       ("melpa" . "https://melpa.org/packages/") 
+       ("org" . "https://orgmode.org/elpa/")))
+    (package-archive-priorities '(("org" . 10) ("gnu" . 20) ("melpa" . 30)))
+    (package-enable-at-startup nil)
+    (package-check-signature nil) ; Temporaryly turned off due to gpg home dir error in Emacs 27 snapshot
+    (package-quickstart t))
+#+END_SRC
+*** Paragraphs
+#+BEGIN_SRC emacs-lisp
+  (use-package paragraphs
+    :ensure nil
+    :bind
+    (("<C-kp-up>" . backward-sentence)
+     ("<C-kp-down>" . forward-sentence)
+     ("s-7" . backward-paragraph) ; Replacement for M-CURLYBRACKETOPENED, which is not recognized on German Layout
+     ("s-0" . forward-paragraph)) ; Replacement for M-CURLYBRACKETCLOSED, which is not recognized on German Layout
+    :preface (provide 'paragraphs)
+    :custom
+    (sentence-end-double-space nil))
+#+END_SRC
+*** Parenthesis
+#+BEGIN_SRC emacs-lisp
+  (use-package paren
+    :ensure nil
+    :custom
+    (show-paren-delay 0)
+    :config
+    (show-paren-mode))
+#+END_SRC
+*** Prog-Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package prog-mode
+   :ensure nil
+   :custom
+   (prettify-symbols-unprettify-at-point t)
+   :config
+   (global-prettify-symbols-mode 1))
+#+END_SRC
+*** PS-Print
+#+BEGIN_SRC emacs-lisp
+  (use-package ps-print
+    :ensure nil
+    :bind
+    ("M-s-p" . ps-print-buffer-with-faces)
+    :custom
+    (ps-printer-name t)
+    (ps-font-family 'Helvetica)
+    (ps-font-size '10)
+    (ps-lpr-command (symbol-value 'my-relative-ghostscript-program))
+    (ps-lpr-switches '("-q" "-dNOPAUSE" "-dBATCH" "-sDEVICE=mswinpr2" "-sPAPERSIZE=a4" "-dDuplex" "-dTumble=false" "-dPDFSETTINGS=/printer"))
+    (ps-spool-duplex t)
+    (ps-print-header nil))
+#+END_SRC
+*** Recentf
+#+BEGIN_SRC emacs-lisp
+  (use-package recentf
+    :ensure nil
+    :bind
+    ("<f12> r" . recentf-open-files)
+    :custom
+    (recentf-max-menu-items 100)
+    (recentf-max-saved-items nil)
+    (recentf-auto-cleanup 'never)
+    (recentf-save-file "~/.emacs.d/recentf.el")
+    (recentf-exclude '("autoloads.el$"))
+    (recentf-filename-handlers 'abbreviate-file-name)
+    :config
+    (recentf-mode))
+#+END_SRC
+*** Register
+#+BEGIN_SRC emacs-lisp
+  (use-package register
+    :ensure nil
+    :bind
+    ("<f11> c" . copy-to-register)
+    ("<f11> i" . insert-register))
+#+END_SRC
+*** Repeat
+#+BEGIN_SRC emacs-lisp
+  (use-package repeat
+    :ensure nil
+    :bind 
+    ("s-." . repeat))
+#+END_SRC
+*** Replace
+#+BEGIN_SRC emacs-lisp
+  (use-package replace
+    :ensure nil
+    :bind 
+    (("s-q r" . replace-string)
+     ("s-q q" . query-replace)
+     ("s-q x" . query-replace-regexp)
+     ("s-q o" . occur)))
+#+END_SRC
+*** Save-History
+#+BEGIN_SRC emacs-lisp
+  (use-package savehist
+   :ensure nil
+   :custom
+   (savehist-file "~/.emacs.d/history.el")
+   :config
+   (savehist-mode))
+#+END_SRC
+*** Save-Place
+#+BEGIN_SRC emacs-lisp
+  (use-package saveplace
+   :ensure nil
+   :custom
+   (save-place-file "~/.emacs.d/places.txt")
+   :config
+   (save-place-mode))
+#+END_SRC
+*** Scrollbar
+#+BEGIN_SRC emacs-lisp
+  (use-package scroll-bar
+   :ensure nil
+   :defer t
+   :custom
+   (scroll-bar-mode nil))
+#+END_SRC
+*** Scroll-Lock
+#+BEGIN_SRC emacs-lisp
+  (use-package scroll-lock
+   :ensure nil
+   :defer t
+   :bind
+   ("<scroll>" . scroll-lock-mode))
+#+END_SRC
+*** Shell
+#+BEGIN_SRC emacs-lisp
+  (use-package shell
+   :ensure nil
+   :custom
+   (explicit-shell-file-name shell-file-name)
+   (explicit-bash.exe-args '("--noediting" "--login"))
+   :hook
+   (shell-mode . ansi-color-for-comint-mode-on))
+#+END_SRC
+*** Simple
+#+BEGIN_SRC emacs-lisp
+  (use-package simple
+    :ensure nil
+    :bind
+    (("s-<SPC>" . cycle-spacing)
+     ("s-b c" . clone-indirect-buffer)
+     ("s-b i" . insert-buffer)
+     ("s-b t" . toggle-truncate-lines))
+    :custom
+    (kill-whole-line t)
+    (set-mark-command-repeat-pop t)
+    (kill-do-not-save-duplicates t)
+    (save-interprogram-paste-before-kill t)
+    (yank-pop-change-selection t)
+    :config
+    (global-visual-line-mode))
+    #+END_SRC
+*** Solar
+#+BEGIN_SRC emacs-lisp
+  (use-package solar
+   :ensure nil
+   :defer t
+   :custom
+   (calendar-longitude 8.5)
+   (calendar-latitude 52.0)
+   (calendar-location-name "Bielefeld"))
+#+END_SRC
+*** Speedbar
+#+BEGIN_SRC emacs-lisp
+  (use-package speedbar
+    :ensure nil
+    :commands
+    (speedbar)
+    :custom
+    (speedbar-hide-button-brackets-flag t)
+    (speedbar-show-unknown-files t)
+    (speedbar-directory-button-trim-method 'trim)
+    (speedbar-use-images nil)
+    (speedbar-indentation-width 2))
+#+END_SRC
+*** Term
+#+BEGIN_SRC emacs-lisp
+  (use-package term
+   :ensure nil
+   :defer t
+   :custom
+   (term-buffer-maximum-size 0))
+#+END_SRC
+*** Time
+#+BEGIN_SRC emacs-lisp
+  (use-package time
+   :ensure nil
+   :hook
+   (emacs-startup . (lambda () (message (concat "Booted in: " (emacs-init-time)))))
+   :custom
+   (display-time-default-load-average nil)
+   (display-time-24hr-format t)
+   (display-time-format " %d.%m.%Y | %H:%M")
+   (legacy-style-world-list
+    '(("PST8PDT" "Los Angeles")
+      ("CST6EDT" "Chicago")
+      ("EST5EDT" "New York")
+      ("GMT0BST" "London")
+      ("CET-1CDT" "Berlin")
+      ("IST-5:30" "Bangalore")
+      ("CST-8" "Peking")
+      ("JST-9" "Tokyo")))
+   :config
+   (display-time-mode -1))
+#+END_SRC
+*** Tramp
+Instead of plink you can use the (default) "pscp" from Putty or "ssh" from Msys2 Openssh.
+#+BEGIN_SRC emacs-lisp
+  (use-package tramp
+   :defer t
+   :ensure nil
+   :custom
+   (tramp-default-method "plink")
+   (tramp-auto-save-directory "~/Temp"))
+#+END_SRC
+*** Timeclock
+#+BEGIN_SRC emacs-lisp
+  (use-package timeclock
+    :ensure nil
+    :bind (
+    ("<f5> i" . timeclock-in)
+    ("<f5> o" . timeclock-out)
+    ("<f5> c" . timeclock-change)
+    ("<f5> r" . timeclock-reread-log)
+    ("<f5> u" . timeclock-update-mode-line)
+    ("<f5> v" . timeclock-visit-timelog)
+    ("<f5> s" . timeclock-status-string)
+    ("<f5> w" . timeclock-when-to-leave-string)
+    ("<f5> t" . timeclock-mode-line-display))
+    :custom
+    (timeclock-use-display-time nil)
+    (timeclock-relative nil)
+    (timeclock-file "~/.emacs.d/timelog.txt")
+    :config
+    (timeclock-mode-line-display))
+   #+END_SRC
+*** Webjump
+#+BEGIN_SRC emacs-lisp
+  (use-package webjump
+    :ensure nil
+    :bind
+    ("s-j" . webjump)
+    :custom
+    (webjump-sites (append '(
+                             ("WikiEmacs" . [simple-query "www.wikemacs.org" "www.wikemacs.org/wiki/" ""])
+                             ("Stackexchange Emacs" . [simple-query "emacs.stackexchange.com" "https://emacs.stackexchange.com/search?q=" ""])
+                             ("PGP Key Server" . [simple-query "pgp.mit.edu" "https://pgp.mit.edu/pks/lookup?op=index&search=" ""])
+                             ))))
+#+END_SRC
+*** Window
+- Set sensibility to values that avoid avoid automatic vertical splitted  windows (!meaning a horizontal split-line!) and split horizontal at startup when desktop save mode is not used.
+- Avoid window creation for the following window-names to force reuse
+#+BEGIN_SRC emacs-lisp
+  (use-package window
+    :ensure nil
+    :preface (provide 'window)
+    :bind 
+    (
+     ("s-o" . other-window)
+     ("<s-kp-0>" . delete-window)
+     ("<s-kp-1>" . delete-other-windows) ; ~maximize current window
+     ("<s-kp-3>" . split-window-right)
+     ("<s-kp-4>" . kill-buffer-and-window)
+     ("<s-kp-add>" . balance-windows)
+     ("<s-kp-divide>" . window-swap-states) ; ~transpose windows
+     )
+      :custom
+      (split-height-threshold nil)
+      (split-width-threshold 0)
+      (display-buffer-alist
+       '(
+         ("*Org Lint*" . ((display-buffer-use-some-window) (inhibit-same-window . t)))
+         (".png" . ((display-buffer-use-some-window) (inhibit-same-window . t)))
+         (".jpg" . ((display-buffer-use-some-window) (inhibit-same-window . t)))
+         (".pdf" . ((display-buffer-use-some-window) (inhibit-same-window . t)))
+         ("^\\*Woman"  . ((display-buffer-use-some-window) (inhibit-same-window . t)))
+         ("-<N>👬"  . ((display-buffer-use-some-window) (inhibit-same-window . t)))
+         ("^\\*Man"    . ((display-buffer-use-some-window) (inhibit-same-window . t)))
+         ))
+      (same-window-buffer-names '("*Apropos*" "*Backtrace*" "*Info*" "*Messages*" "*Shell*" "*Summary*")))
+#+END_SRC
+*** Windmove
+#+BEGIN_SRC emacs-lisp
+  (use-package windmove
+    :bind
+    (("<C-s-left>" . windmove-left)
+     ("<C-s-right>" . windmove-right)
+     ("<C-s-up>" . windmove-up)
+     ("<C-s-down>" . windmove-down)))
+#+END_SRC
+** Custom Functions
+**** Insert Page Break
+#+BEGIN_SRC emacs-lisp
+  (defun my-insert-page-break ()
+    "Insert Page-Break"
+    (interactive)
+    (insert "\^L")
+    (newline))
+#+END_SRC
+**** Mark Line
+#+BEGIN_SRC emacs-lisp
+  (defun my-mark-line ()
+    "Mark line"
+    (interactive)
+    (end-of-line)
+    (set-mark (line-beginning-position)))
+#+END_SRC
+**** Save Macro
+#+BEGIN_SRC emacs-lisp
+  (defun my-save-macro (name)
+    "Save a macro. Take a name as an argument and save the last defined macro under this name. Call Macros directly in M-x using the macro-name, to combine the location in the list start macros with 'macro-xxxxxx'"
+    (interactive "SName of the macro :")
+    (kmacro-name-last-macro name)
+    (find-file "~/.emacs.d/macros.el")
+    (goto-char (point-max))
+    (newline)
+    (insert-kbd-macro name)
+    (newline)
+    (save-buffer)
+    (switch-to-buffer nil))
+#+END_SRC
+**** Save Whole Line(s)
+#+BEGIN_SRC emacs-lisp
+  (defun my-save-whole-line (&optional arg)
+    (interactive "p")
+    (save-excursion
+      (forward-visible-line 0)
+      (copy-region-as-kill
+       (point)
+       (progn (if arg (forward-visible-line arg)
+                (end-of-visible-line))
+              (point)))))
+#+END_SRC
+**** Timestamper
+Used for temp.txt
+#+BEGIN_SRC emacs-lisp
+(defun my-timestamper ()
+  "Inserts current date+time"
+  (interactive)
+  (progn
+    (insert "\^L")
+    (newline)
+    (insert (format-time-string "%c" (current-time)))
+    (newline)))
+#+END_SRC
+**** Fix Compile Output
+#+BEGIN_SRC emacs-lisp
+  (defun my-colorize-compilation-buffer ()
+    (when (eq major-mode 'compilation-mode)
+      (ansi-color-apply-on-region compilation-filter-start (point-max))))
+#+END_SRC
+**** Update LocateDB
+#+BEGIN_SRC emacs-lisp
+  (defun my-update-locatedb ()
+    (interactive)
+    (start-process "updatedb" "*Messages*" "updatedb"))
+#+END_SRC
+**** Search-Near
+#+BEGIN_SRC emacs-lisp
+  (defun my-search-near ()
+    "Show occurences of two search phrases in a text (a single occurence may
+     span multiple lines). A maximal distance is given in characters (including
+     newlines and maybe other special chars)."
+    (interactive)
+    (let* ((phrase1
+            (read-string "1st phrase (regexp, lowercase means case insens.):"))
+           (phrase2
+            (read-string "2nd phrase (regexp, lowercase means case insens.):"))
+           (max-distance
+            (read-number "Distance (max. number of chars between):" 160))
+           (maxdist-anychars-including-newlines-regexp
+            (concat "\\(.\\|\n\\)" "\\{," (number-to-string max-distance) "\\}")))
+      (occur
+       (concat  
+        "\\(" phrase1 maxdist-anychars-including-newlines-regexp phrase2
+        "\\|" phrase2 maxdist-anychars-including-newlines-regexp phrase1 "\\)"))
+      ))
+#+END_SRC
+**** Toggle-Transparency
+#+BEGIN_SRC emacs-lisp
+  (defun my-toggle-transparency ()
+    (interactive)
+    (let ((alpha (frame-parameter nil 'alpha)))
+      (set-frame-parameter
+       nil 'alpha
+       (if (eql (cond ((numberp alpha) alpha)
+                      ((numberp (cdr alpha)) (cdr alpha))
+                      ((numberp (cadr alpha)) (cadr alpha)))
+                100)
+           '(85 . 85) '(100 . 100)))))
+#+END_SRC
+**** Dir-Txt-to-Org-Converter
+#+BEGIN_SRC emacs-lisp
+  (defun my-dir-to-org (dir org-file)
+    "Create a file ORG-FILE which has all txt files in DIR as headlines
+  and the contents of the files below the headlines."
+    (interactive "DDirectory to convert: \nFFilename: ")
+    (let ((files (directory-files
+                  dir t ".*\\.txt\\'")))                     
+      (with-temp-file org-file
+        (insert (concat "* " (file-name-directory dir) "\n\n"))
+        (dolist (file files)
+          (insert (concat "** " (file-name-nondirectory file) "\n\n"))
+          (insert-file-contents file)
+          (goto-char (point-max))
+          (insert "\n")))))
+#+END_SRC
+**** Diff-last-two-Killring-Entries
+#+begin_src emacs-lisp
+  (defun my-diff-last-two-kills ()
+    "Put the last two kills to temporary buffers and diff them."
+    (interactive)
+    (let ((old (generate-new-buffer "old"))
+          (new (generate-new-buffer "new")))
+      (set-buffer old)
+      (insert (current-kill 0 t))
+      (set-buffer new)
+      (insert (current-kill 1 t))
+      (diff old new)
+      (kill-buffer old)
+      (kill-buffer new)))
+#+end_src
+* Manual
+** Initialization
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'load-path "~/.emacs.d/myscripts/")
+#+END_SRC
+** Fakecygpty
+#+BEGIN_SRC emacs-lisp
+  (use-package fakecygpty
+    :ensure nil
+    :config
+    (fakecygpty-activate))
+#+END_SRC
+* External
+** All-the-icons
+*** All-the-icons-dired
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons-dired
+    :hook
+    (dired-mode . all-the-icons-dired-mode))
+#+END_SRC
+*** All-The-Icons-Ivy
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons-ivy
+    :config
+    (all-the-icons-ivy-setup))
+#+END_SRC
+** Avy
+Also used by swiper. Swiper-Avy
+#+BEGIN_SRC emacs-lisp
+  (use-package avy
+    :bind (
+           ("<f2>" . avy-goto-line) ; was 2c-command
+           ("s-<f2>" . avy-goto-char))
+    :custom
+    (avy-keys (number-sequence ?0 ?9)))
+#+END_SRC
+** Beacon
+#+BEGIN_SRC emacs-lisp
+  (use-package beacon
+    :config
+    (beacon-mode))
+#+END_SRC
+** Bind-Key
+#+BEGIN_SRC emacs-lisp
+  (use-package bind-key
+  :bind
+  ("<f12> p" . describe-personal-keybindings))
+#+END_SRC
+** Celestial Mode-Line
+#+BEGIN_SRC emacs-lisp
+  (use-package celestial-mode-line
+    :init
+    (add-to-list 'global-mode-string 'celestial-mode-line-string t)
+    (defvar celestial-mode-line-sunrise-sunset-alist '((sunrise . "*↑ ") (sunset . "*↓ ")))
+    :config
+    (celestial-mode-line-start-timer))
+#+END_SRC
+** Company
+*** Company-Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package company
+    :custom
+    (company-idle-delay 0.5)
+    (company-global-modes '(not eshell-mode comint-mode erc-mode rcirc-mode))
+    :hook
+    (after-init . global-company-mode))
+#+END_SRC
+*** Company-Auctex
+#+BEGIN_SRC emacs-lisp
+  (use-package company-auctex
+    :mode ("\\.tex\\'" . TeX-latex-mode)
+    :init
+    (company-auctex-init))
+#+END_SRC
+*** Company-Bibtex
+#+BEGIN_SRC emacs-lisp
+  (use-package company-bibtex
+    :mode ("\\.tex\\'" . TeX-latex-mode)
+    :config
+    (add-to-list 'company-backends 'company-bibtex))
+#+END_SRC
+** Counsel
+*** Counsel-Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel
+    :bind
+    (("<f1> u" . counsel-unicode-char)
+     ("<f1> g" . counsel-git) ; was describe-gnu-project
+     ("<f1> y" . counsel-yank-pop)
+     ("<f1> <SPC>" . counsel-mark-ring)
+     ("<f1> <f9>" . counsel-locate)
+     ("<f9> c" . counsel-bookmark))
+    :config
+    (counsel-mode))
+#+END_SRC
+*** Counsel-Firefox-Data
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel-ffdata
+    :bind
+    ("<f12> f f" . counsel-ffdata-firefox-bookmarks)
+    ("<f12> f h" . counsel-ffdata-firefox-history))
+#+END_SRC
+** Doom-Modeline
+#+BEGIN_SRC emacs-lisp
+  (use-package doom-modeline
+    :custom
+    (doom-modeline-icon t)
+    (doom-modeline-minor-modes t)
+    :config
+    (doom-modeline-mode))
+#+END_SRC
+** Drag-Stuff
+#+BEGIN_SRC emacs-lisp
+  (use-package drag-stuff
+    :bind
+    (("s-<up>" . drag-stuff-up)
+     ("s-<down>" . drag-stuff-down)
+     ("s-<left>" . drag-stuff-left)
+     ("s-<right>" . drag-stuff-right))
+    :config
+    (drag-stuff-global-mode))
+#+END_SRC
+** Easy-Kill
+#+BEGIN_SRC emacs-lisp
+  (use-package easy-kill
+    :bind
+    (([remap kill-ring-save] . easy-kill)
+     ([remap mark-sexp] . easy-mark)))
+#+END_SRC
+*** Base-Usage
+M-w w: save word at point
+M-w s: save sexp at point
+M-w l: save list at point (enclosing sexp)
+M-w d: save defun at point
+M-w D: save current defun name
+M-w f: save file at point
+M-w b: save buffer-file-name or default-directory. - changes the kill to the directory name, + to full name and 0 to basename.
+*** Modifier
+@: append selection to previous kill and exit. For example, M-w d @ will append current function to last kill.
+C-w: kill selection and exit
++, - and 1..9: expand/shrink selection
+0 shrink the selection to the initial size i.e. before any expansion
+SPC: cycle through things in easy-kill-alist
+C-SPC: turn selection into an active region
+C-g: abort
+?: help
+** Expand-Region
+#+BEGIN_SRC emacs-lisp
+  (use-package expand-region
+    :bind
+    (("s-+" . er/expand-region)
+     ("s--" . er/contract-region)))
+#+END_SRC
+** Evil
+*** Evil-Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package evil
+    :custom
+    (evil-toggle-key "s-z")
+    (evil-default-state 'emacs)
+    (evil-emacs-state-tag "Emacs")
+    (evil-normal-state-tag "Normal")
+    (evil-insert-state-tag "Insert")
+    (evil-visual-state-tag "Visual")
+    (evil-motion-state-tag "Motion")
+    (evil-replace-state-tag "Replace")
+    (evil-operator-state-tag "Operator")
+    :config
+    (add-to-list 'global-mode-string evil-mode-line-tag)
+    (evil-mode))
+#+END_SRC
+*** Evil-Tutor
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-tutor
+    :commands
+    (evil-tutor-start evil-tutor-resume))
+#+END_SRC
+** German-Holydays
+Needs to be configed, not customized in order to work.
+#+BEGIN_SRC emacs-lisp
+  (use-package german-holidays
+    :config
+    (setq calendar-holidays holiday-german-NW-holidays))
+#+END_SRC
+** Ivy
+*** Ivy-Mode
+Ivy-views are defined in Specific-Configuration
+#+BEGIN_SRC emacs-lisp
+    (use-package ivy
+      :bind
+      (("s-v r" . ivy-resume)
+       ("s-v o" . ivy-occur)
+       ("s-v v" . ivy-switch-view)
+       (:map ivy-minibuffer-map ; bind in the ivy buffer only
+             ("M-<up>"   . ivy-previous-history-element)
+             ("M-<down>"   . ivy-next-history-element)))
+      :custom
+      (ivy-wrap t)
+      (ivy-use-virtual-buffers t)
+      (ivy-display-style 'fancy)
+      (ivy-count-format "(%d/%d) ")
+      (ivy-height 20)
+      (ivy-use-selectable-prompt t)
+  ;;  (ivy-completing-read-dynamic-collection t) Causes problems with Synosaurus.
+      (ivy-views (symbol-value 'my-ivy-views))
+      :config
+      (ivy-mode 1))
+#+END_SRC
+*** Ivy-Rich
+#+begin_src emacs-lisp
+  (use-package ivy-rich
+    :config
+    (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+    (ivy-rich-mode 1))
+#+end_src
+** Key-Frequency
+#+BEGIN_SRC emacs-lisp
+  (use-package keyfreq
+    :bind
+    ("<f12> q" . keyfreq-show)
+    :demand t
+    :custom
+    (keyfreq-file "~/.emacs.d/keyfreq.txt")
+    :config
+    (keyfreq-mode)
+    (keyfreq-autosave-mode))
+#+END_SRC
+** Latex
+*** Auctex
+Remove TeX-global-PDF-mode LaTeX-mode-hook to enable LaTeX compiling to dvi intstead of pdf.
+Pay attention to file-locking in Windows explorer pdf-preview when opening the compiled pdf in pdf-tools.
+**** Tex-Mik
+#+BEGIN_SRC emacs-lisp
+  (use-package tex-mik
+    :ensure nil
+    :mode ("\\.tex\\'" . TeX-latex-mode))
+#+End_SRC
+**** Reftex
+#+BEGIN_SRC emacs-lisp
+  (use-package reftex
+    :ensure nil
+    :commands
+    (turn-on-reftex reftex-mode)
+    :mode ("\\.tex\\'" . TeX-latex-mode)
+    :hook
+    (LaTeX-mode . turn-on-reftex)
+    :custom
+    (reftex-plug-into-AUCTeX t)
+    (reftex-use-fonts t)
+    (reftex-default-bibliography '("~/tex/bibliography.bib")))
+#+End_SRC
+**** Bibtex
+#+BEGIN_SRC emacs-lisp
+  (use-package bibtex
+    :ensure nil
+    :mode ("\\.tex\\'" . TeX-latex-mode)
+    :custom
+    (bibtex-dialect 'biblatex)
+    (bibtex-align-at-equal-sign t)
+    (bibtex-text-indentation 20)
+    (bibtex-completion-bibliography '("~/tex/bibliography.bib")))
+#+End_SRC
+**** Tex-site
+#+BEGIN_SRC emacs-lisp
+  (use-package tex-site
+    :ensure auctex
+    :mode ("\\.tex\\'" . TeX-latex-mode)
+    :hook
+    (LaTeX-mode . TeX-global-PDF-mode)
+    :custom
+    (TeX-auto-save t)
+    (TeX-parse-self t)
+    (TeX-save-query nil)
+    (preview-gs-command (symbol-value 'my-relative-ghostscript-program))
+    (TeX-master nil)
+    :config
+              (lambda ()
+                (add-to-list 'TeX-command-list
+                             '("Texify-DVI" "texify -b %t" TeX-run-command t (latex-mode)
+                               :help "Texify document to dvi (resolves all cross-references, etc.)") t)
+                (add-to-list 'TeX-command-list
+                             '("Texify-PDF" "texify -b -p %t" TeX-run-command t (latex-mode)
+                               :help "Texify document to pdf (resolves all cross-references, etc.)") t)))
+#+End_SRC
+**** Tex-Buf
+#+BEGIN_SRC emacs-lisp
+  (use-package tex-buf
+    :ensure auctex
+    :mode ("\\.tex\\'" . TeX-latex-mode)
+    :config
+    (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)) ; Can't be initialized via :hook since it doesn't end with -hook
+#+End_SRC
+*** Latex-Extra
+The wrapping is needed to avoid "free variable"
+#+BEGIN_SRC emacs-lisp
+ (let ((byte-compile-warnings '(not free-vars)))
+  (use-package latex-extra
+    :demand t
+    :hook
+    (LaTeX-mode . latex-extra-mode)))
+#+END_SRC
+** Lisp-Butt-Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package lisp-butt-mode
+    :demand t
+    :bind
+    ("<f12> b" . lisp-butt-global-mode)
+    :config
+    (lisp-butt-global-mode))
+#+END_SRC
+** Lua-Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package lua-mode
+    :mode
+    ("\\.lua\\'" . lua-mode))
+#+END_SRC
+** Magit
+Before installation and before using start a msys2 shell. It seems that this sets some values for magit to work correctly in order to find and use the git executable. Setting it in emacs will not work sufficiently.
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :bind
+    ("s-m s" . magit-status)
+    ("s-m l" . magit-log)
+    ("s-m b" . magit-blame)
+    :custom
+    (magit-auto-revert-mode nil))
+#+END_SRC
+** Minions
+#+BEGIN_SRC emacs-lisp
+  (use-package minions
+    :custom
+    (minions-mode-line-lighter "⚙")
+    (minions-mode-line-delimiters nil)
+    (minions-direct '(overwrite-mode flycheck-mode projectile-mode))
+    (minions-whitelist '((abbrev-mode . nil)
+                         (auto-fill-mode . nil)
+                         (auto-revert-tail-mode . nil)
+                         (flyspell-mode . nil)
+                         (page-break-lines-mode . nil)
+                         (font-lock-mode . nil)
+                         (display-line-numbers-mode . nil)
+                         (highlight-changes-mode . nil)
+                         (ruler-mode . nil)))
+    :config
+    (minions-mode))
+#+END_SRC
+** Nyan Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package nyan-mode
+    :config
+    (nyan-mode))
+#+END_SRC
+** Org
+*** Org-Mode Main-Config
+**** Org
+#+BEGIN_SRC emacs-lisp
+  (use-package org
+    :pin org
+    :bind (
+           ("C-c c" . org-capture)
+           :map org-mode-map
+           ("C-c l" . org-store-link)
+           ("C-c a" . org-agenda)
+           ("C-c u" . outline-up-heading)
+           ("C-c p" . org-toggle-inline-images)
+           ("C-c r" . org-sort)
+           ("C-c i" . org-tree-to-indirect-buffer)
+           ("C-c s" . org-cut-special)
+           ("C-c O" . org-occur)
+           ("C-c d" . my-org-cycle-previous-heading)
+           ("C-c D" . my-org-cycle-up-heading)
+           ("C-c t" . my-org-timestamper)
+           ("s-p" . org-previous-visible-heading)
+           ("<s-tab>" . org-cycle-list-bullet)
+           ("C-n"   . org-toggle-narrow-to-subtree)
+           ("s-n" . org-next-visible-heading))
+    :custom
+    (org-outline-path-complete-in-steps nil)
+    (org-catch-invisible-edits 'error)
+    (org-default-notes-file "~/org/notes.org")
+    (org-ditaa-jar-path (concat my-relative-directory-org-ditaa-jar-path "ditaa0_11.jar"))
+    (org-ellipsis "↴")
+    (org-hide-emphasis-markers t)
+    (org-highlight-latex-and-related '(native script entities))
+    (org-babel-load-languages '((ditaa . t) (gnuplot . t) (latex . t) (emacs-lisp . t) (C . t)))
+    (org-special-ctrl-a/e t)
+    (org-startup-indented t)
+    (org-startup-truncated nil)
+    (org-tags-column -1)
+    (org-todo-keywords
+     '((sequence "ZU-ERLEDIGEN" "IN-ARBEIT" "UNTERBROCHEN" "|" "ERLEDIGT" "STORNIERT")
+       (sequence "WARTEN-RÜCKM-KUNDE" "WARTEN-RÜCKM-INTERN" "WARTEN-WARE" "|")))
+    (org-tag-alist '(("important" . ?i)
+                     ("urgent"    . ?u)))
+    (org-use-property-inheritance t)
+    (org-yank-adjusted-subtrees t)
+    :custom-face
+    (org-code ((nil :inherit 'org-habit-alert-face)))
+    (org-verbatim ((nil :inherit 'org-habit-overdue-face)))
+    :hook
+    (org-agenda-finalize . org-agenda-to-appt))
+    #+END_SRC
+**** Org-Agenda
+ #+BEGIN_SRC emacs-lisp
+   (use-package org-agenda
+     :ensure nil
+     :defer t
+     :custom
+     (org-agenda-start-with-clockreport-mode t)
+     (org-agenda-start-with-log-mode t)
+     (org-agenda-hide-tags-regexp ".*")
+     (org-agenda-time-grid nil)
+     (org-agenda-span 'day)
+     (org-agenda-include-diary t)
+     (org-agenda-clockreport-parameter-plist (quote (:lang "de" :maxlevel 6 :fileskip0 t :properties ("Auftragsnummer" "Leistungsart" "Abgemeldet") :indent t :narrow 80!)))
+     (org-agenda-files (symbol-value 'my-relative-directory-org-agenda-files))
+     (org-agenda-custom-commands
+      '(
+        ("1" "Q1" tags-todo "+important+urgent")
+        ("2" "Q2" tags-todo "+important-urgent")
+        ("3" "Q3" tags-todo "-important+urgent")
+        ("4" "Q4" tags-todo "-important-urgent")
+        ("n" "Agenda and all TODOs" ((agenda "") (alltodo "")))
+        )
+      ))
+ #+END_SRC
+**** Org-Capture
+ #+BEGIN_SRC emacs-lisp
+   (use-package org-capture
+     :ensure nil
+     :defer t
+     :custom
+     (org-capture-templates
+      '(("a" "Aufgabe" entry (file+headline "~/org/notes.org" "Aufgaben ohne Zuordnung")
+         "* ZU-ERLEDIGEN %?\n  %i\n  %a")
+        ("j" "Journal" entry (file+olp+datetree "~/org/journal.org")
+         "* ERLEDIGT %? \n:PROPERTIES:\n:Abgemeldet: Nein\n:Leistungsart:\n:END:\nCLOCK: %U--%U\n%i\n%a")
+        ("n" "Notiz" entry (file+headline "~/org/notes.org" "Notizen unsortiert")
+         "* %?")
+        ("p" "Protocol" entry (file+headline "~/org/notes.org" "Notizen unsortiert")
+         "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
+        ("L" "Protocol Link" entry (file+headline "~/org/notes.org" "Notizen unsortiert")
+         "* %? [[%:link][%:description]] \nCaptured On: %U")
+        )))
+  #+END_SRC
+**** Org-Clock
+ #+BEGIN_SRC emacs-lisp
+   (use-package org-clock
+     :ensure nil
+     :defer t
+     :custom
+     (org-clock-into-drawer nil)
+     (org-clock-persist t)
+     (org-clock-report-include-clocking-task t))
+  #+END_SRC
+**** Org-Faces
+ #+BEGIN_SRC emacs-lisp
+   (use-package org-faces
+     :ensure nil
+     :defer t
+     :custom
+     (org-todo-keyword-faces
+      '(("ZU-ERLEDIGEN" . "white")
+        ("IN-ARBEIT" . "red")
+        ("UNTERBROCHEN" . "orange")
+        ("WARTEN-RÜCKM-KUNDE" . "yellow")
+         ("WARTEN-RÜCKM-INTERN" . "yellow")
+         ("WARTEN-WARE" . "yellow")
+         ("ERLEDIGT" . "green")
+         ("STORNIERT" .  "green"))))
+ #+END_SRC
+**** Org-Goto
+ #+BEGIN_SRC emacs-lisp
+   (use-package org-goto
+     :ensure nil
+     :defer t
+     :custom
+     (org-goto-interface 'outline-path-completion))
+  #+END_SRC
+**** Org-ID
+ #+BEGIN_SRC emacs-lisp
+   (use-package org-id
+     :ensure nil
+     :defer t
+     :custom
+     (org-id-locations-file "~/.emacs.d/org-id-locations.txt"))
+  #+END_SRC
+**** Org-Keys
+ #+BEGIN_SRC emacs-lisp
+   (use-package org-keys
+     :ensure nil
+     :defer t
+     :custom
+     (org-return-follows-link t)
+     (org-use-speed-commands t))
+  #+END_SRC
+**** Org-Src
+ #+BEGIN_SRC emacs-lisp
+   (use-package org-src
+     :ensure nil
+     :defer t
+     :custom
+     (org-src-tab-acts-natively t))
+  #+END_SRC
+*** Org-Bookmark-heading
+#+BEGIN_SRC emacs-lisp
+  (use-package org-bookmark-heading)
+#+END_SRC
+*** Org-Drill
+#+BEGIN_SRC emacs-lisp
+  (use-package org-drill)
+#+END_SRC
+*** Org-Custom Functions
+**** Cycle previous heading
+Collapse the current subtee
+#+BEGIN_SRC emacs-lisp
+ (defun my-org-cycle-previous-heading ()
+    (interactive)
+    (outline-previous-heading)
+    (org-cycle)
+    (recenter))
+#+END_SRC
+**** Cycle up heading
+Collapse subtee above current heading
+#+BEGIN_SRC emacs-lisp
+  (defun my-org-cycle-up-heading ()
+    (interactive)
+    (org-up-heading-safe)
+    (org-cycle)
+    (org-cycle)
+    (recenter))
+#+END_SRC
+**** Dir-to-Org
+#+BEGIN_SRC emacs-lisp
+  (defun my-dir-to-org (dir org-file)
+    "Create a file ORG-FILE which has all txt files in DIR as linked headlines
+     and the contents of the files below the headlines."
+    (interactive "DDirectory to convert: \nFFilename: ")
+    (let ((files (directory-files
+                  dir t ".*\\.txt\\'")))
+      (with-temp-file org-file
+        (dolist (file files)
+          (insert (concat "* " "[[" file "][" (file-name-nondirectory file) "]]\n\n"))
+          (insert-file-contents file)
+          (goto-char (point-max))
+          (insert "\n")))))
+#+END_SRC
+**** Massconvert using Dir-to-Org
+#+BEGIN_SRC emacs-lisp
+  (defun my-mass-conversion (source-dir target-dir)
+    "Create one org file per directory of SOURCE-DIR inside TARGET-DIR."
+    (interactive "DDirectory to convert: \nDTarget Directory:")
+    (let ((dirs-full
+           (remove-if-not #'file-directory-p
+                          (directory-files
+                           source-dir t
+                           directory-files-no-dot-files-regexp))))
+      (mapc (lambda (dir)
+              (my-dir-to-org dir
+                             (concat target-dir
+                                     (file-name-base dir) ".org")))
+            dirs-full)))
+#+END_SRC
+**** Teleport Heading using avy
+#+BEGIN_SRC emacs-lisp
+  (defun my-org-avy-refile-as-child ()
+    "Refile current heading as first child of heading selected with `avy.'"
+    ;; Inspired by `org-teleport': http://kitchingroup.cheme.cmu.edu/blog/2016/03/18/Org-teleport-headlines/
+      (interactive)
+      (let* ((org-reverse-note-order t)
+             (pos (save-excursion
+                    (avy-with avy-goto-line (avy--generic-jump (rx bol "*") nil avy-style))
+                    (point)))
+             (filename (buffer-file-name (or (buffer-base-buffer (current-buffer))
+                                             (current-buffer))))
+             (rfloc (list nil filename nil pos)))
+        (org-refile nil nil rfloc)))
+#+END_SRC
+**** Org-Timestamper
+#+BEGIN_SRC emacs-lisp
+  (defun my-org-timestamper ()
+    "Inserts current date+time"
+    (interactive)
+    (progn
+      (insert " ")
+      (org-insert-time-stamp nil t t)))
+#+END_SRC
+*** Org-Sticky-Header
+#+BEGIN_SRC emacs-lisp
+(use-package org-sticky-header
+  :hook
+  (org-mode . org-sticky-header-mode)
+  :custom 
+  (org-sticky-header-full-path 'full)
+  (org-sticky-header-prefix "📌: ")
+  (org-sticky-header-outline-path-separator " > "))
+#+END_SRC
+*** Org-Contrib
+**** Org-Habit
+Org-Habit-Colours are used in emphasis.
+#+BEGIN_SRC emacs-lisp
+  (use-package org-habit
+    :ensure nil)
+#+END_SRC
+** Page-break-lines
+#+BEGIN_SRC emacs-lisp
+  (use-package page-break-lines
+    :custom
+    (page-break-lines-modes (quote (text-mode compilation-mode))))
+    :config
+    (global-page-break-lines-mode)
+#+END_SRC
+** Pandoc-Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package pandoc-mode
+  :commands
+  (pandoc-mode))
+#+END_SRC
+** PDF-Tools
+One first run execute (pdf-tools-install)
+When Path to EPDFInfo.exe is in PATH, therefore known by emacs. The Skript will compile there.
+#+BEGIN_SRC emacs-lisp
+  (use-package pdf-tools
+    :magic ("%PDF" . pdf-view-mode)
+    :bind  ((
+             :map pdf-view-mode-map
+                  ("<home>" . pdf-view-first-page)
+                  ("<end>" . pdf-view-last-page)))
+    :hook
+    (pdf-view-mode . (lambda() (blink-cursor-mode -1)))
+    :custom
+    (pdf-view-display-size 'fit-page)
+    :config
+    (pdf-tools-install :no-query))
+#+END_SRC
+** Prescient
+*** Precient-Core
+#+BEGIN_SRC emacs-lisp
+  (use-package prescient
+   :config
+   (prescient-persist-mode))
+#+END_SRC
+*** Ivy-Prescient Backend
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy-prescient
+   :after counsel
+   :config
+   (ivy-prescient-mode))
+#+END_SRC
+*** Company-Prescient Backend
+#+BEGIN_SRC emacs-lisp
+  (use-package company-prescient
+   :config
+   (company-prescient-mode))
+#+END_SRC
+** Rainbow-Delimiters
+Copy this in source for testing: ((((((((()))))))))
+#+BEGIN_SRC emacs-lisp
+  (use-package rainbow-delimiters
+    :custom-face
+    (rainbow-delimiters-depth-1-face ((nil :foreground "#edd400")))
+    (rainbow-delimiters-depth-2-face ((nil :foreground "#f57900")))
+    (rainbow-delimiters-depth-3-face ((nil :foreground "#73d216")))
+    (rainbow-delimiters-depth-4-face ((nil :foreground "#3465a4")))
+    (rainbow-delimiters-depth-5-face ((nil :foreground "#c17d11")))
+    (rainbow-delimiters-depth-6-face ((nil :foreground "#75507b")))
+    (rainbow-delimiters-depth-7-face ((nil :foreground "#cc0000")))
+    (rainbow-delimiters-depth-8-face ((nil :foreground "#d3d7cf")))
+    (rainbow-delimiters-depth-9-face ((nil :foreground "#555753")))
+    (rainbow-delimiters-unmatched-face ((nil :foreground unspecified :inherit show-paren-mismatch :strike-through t)))
+    :hook
+    (prog-mode . rainbow-delimiters-mode))
+#+END_SRC
+** Rainbow-Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package rainbow-mode
+    :hook
+    (prog-mode . rainbow-mode))
+#+END_SRC
+** Register-List
+#+BEGIN_SRC emacs-lisp
+  (use-package register-list
+    :bind
+    ("<f11> l" . register-list))
+#+END_SRC
+** RipGrep/WGrep
+*** RG
+#+BEGIN_SRC emacs-lisp
+  (use-package rg
+    :bind
+    ("s-R" . rg-menu))
+#+END_SRC
+*** WGrep
+#+BEGIN_SRC emacs-lisp
+  (use-package wgrep
+    :hook
+    (rg-mode . wgrep-rg-setup)
+    :config
+    (autoload 'wgrep-rg-setup "wgrep-rg"))
+#+END_SRC
+** Synosaurus
+#+BEGIN_SRC emacs-lisp
+  (use-package synosaurus
+    :bind
+    (("s-u l" . synosaurus-lookup)
+     ("s-u r" . synosaurus-choose-and-replace)
+     ("s-u i" . synosaurus-choose-and-insert))
+    :custom
+    (synosaurus-backend (quote synosaurus-backend-openthesaurus))
+    (synosaurus-choose-method 'default)
+    (synosaurus-prefix "s-s"))
+#+END_SRC
+** Syslog-Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package syslog-mode
+    :mode
+    ("\\.log\\'" . syslog-mode))
+#+END_SRC
+** System Packages
+#+BEGIN_SRC emacs-lisp
+(use-package system-packages
+  :bind
+  ("<f12> s" . system-packages-update)
+  :custom
+  (system-packages-usesudo nil))
+#+END_SRC
+** Swiper
+To select buffers in Swiper-Multi use C-M-m to select buffers.
+#+BEGIN_SRC emacs-lisp
+  (use-package swiper
+    :bind
+    (("s-f" . swiper)
+     ("M-s-f a" . swiper-all)
+     ("M-s-f m" . swiper-multi)
+     ("M-s-f s" . swiper-isearch)
+     ("M-s-f r" . swiper-backward)
+     (:map swiper-map
+           ("C-#"   . swiper-avy)))
+    :custom
+    (swiper-action-recenter t))
+#+END_SRC
+** Temporary-Persistent
+#+BEGIN_SRC emacs-lisp
+  (use-package temporary-persistent
+  :bind
+  ("<pause>" . my-timestamper-for-temp)
+  :custom
+  (temporary-persistent-buffer-name-template "temp.txt")
+  :config
+  (defun my-timestamper-for-temp ()
+    "Inserts current date+time"
+    (interactive)
+    (progn
+      (temporary-persistent-switch-buffer)
+      (end-of-buffer)
+      (newline)
+      (end-of-buffer)
+      (insert "\^L")
+      (newline)
+      (end-of-buffer)
+      (insert (format-time-string "%c" (current-time)))
+      (newline)
+      (end-of-buffer)
+      (recenter)
+      (raise-frame))))
+#+END_SRC
+** Typit
+#+BEGIN_SRC emacs-lisp
+  (use-package typit
+    :commands
+    (typit-advanced-test typit-basic-test typit-test)
+    :custom
+    (typit-dict "german.txt")
+    :custom-face
+    (typit-correct-char ((nil :inherit success :weight extrabold)))
+    (typit-wrong-char ((nil :inherit error :underline t :weight extrabold))))
+#+END_SRC
+** Undo-Tree
+undo-tree-auto-save-history is nil otherwise desktop-read might fail and therfore emacs startup
+#+BEGIN_SRC emacs-lisp
+  (use-package undo-tree
+    :bind
+    ("C-S-z" . redo)
+    :custom
+    (undo-tree-history-directory-alist '(("." . "~/.emacs.d/undo-tree")))
+    (undo-tree-visualizer-timestamps t)
+    (undo-tree-visualizer-diff t)
+    :config
+    (global-undo-tree-mode))
+#+END_SRC
+** Volatile-highlights
+#+BEGIN_SRC emacs-lisp
+  (use-package volatile-highlights
+    :config
+    (volatile-highlights-mode)
+    (vhl/define-extension 'undo-tree 'undo-tree-yank 'undo-tree-move)
+    (vhl/install-extension 'undo-tree))
+#+END_SRC
+** Yankpad
+#+BEGIN_SRC emacs-lisp
+  (use-package yankpad
+    :bind
+    (("s-y i" . yankpad-insert)
+     ("s-y x" . yankpad-expand)
+     ("s-y m" . yankpad-map)
+     ("s-y r" . yankpad-reload)
+     ("s-y s" . yankpad-set-category)
+     ("s-y a" . yankpad-append-category))
+    :custom
+    (yankpad-file "~/org/yankpad.org")
+    :config
+    (add-to-list 'company-backends #'company-yankpad))
+#+END_SRC
+** Which-Key
+#+BEGIN_SRC emacs-lisp
+  (use-package which-key
+    :bind
+    ("s-w t" . which-key-show-top-level)
+    ("s-w m" . which-key-show-major-mode)
+    ("s-w k" . which-key-show-keymap)
+    :custom
+    (which-key-side-window-max-width 0.666)
+    (which-key-show-prefix 'top)
+    (which-key-separator " ")
+    (which-key-side-window-location 'right)
+    :config
+    (add-to-list 'which-key-replacement-alist '(("left"      . nil) . ("⬅" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("right"     . nil) . ("➡" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("up"        . nil) . ("⬆" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("down"      . nil) . ("⬇" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("TAB"       . nil) . ("↹" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("tab"       . nil) . ("↹" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("ESC"       . nil) . ("⎋" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("RET"       . nil) . ("⏎" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("return"    . nil) . ("⏎" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("DEL"       . nil) . ("⌫" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("backspace" . nil) . ("⌫" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("SPC"       . nil) . ("␣" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("home"      . nil) . ("⇤" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("end"       . nil) . ("⇥" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("prior"     . nil) . ("⤒" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("next"      . nil) . ("⤓" . nil)))
+    (add-to-list 'which-key-replacement-alist '(("insert"    . nil) . ("⎀" . nil)))
+    (which-key-mode))
+#+END_SRC
