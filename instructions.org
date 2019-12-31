@@ -1,10 +1,11 @@
 * Preface
 - I'm not a coder. Therefore the configuration is not geared towards that.
-- I'm on windows and on a slow pc. Therefore packages that are not working fast on windows (i.e. because they use extensive process-forking - which is non existent on windows) are not used no matter how useful they might be. Also some packages do not work properly because they use (on windows) not properly implemented backends, like terminals and shells.
-- I have a certain workflow, that involves the use of windows specfic apps, like windows-explorer. Because of that and things mentioned above some packages, although very useful by themself, have no use for me. Projectile would be one example.
-- I try to be use packages that fit within the basic emacs concepts. Although emacs can be bend beyond recognicion doesn't mean I like that. So evil mode and helm are not for me.
-- A word on spacemacs/prelude and similar emacs distributions. First especially spacemacs is geard towards vi users and programmers. Currently I don't want both. This stands symbol for the general problem with all preconfigured or micropreconfigured (Spacemacs-Layers) Emacs distributions - they contain a lot of stuff I don't need or want. This extra bloat causes slowdown. The second problem is that every package in emacs can fail or misbehave. This accumulates with the number of packages. Therefore IMHO the best option is to have a slim emacs only with packages that you need or at least understand their use. There might be users who can harness the advantages of these preconfigured emacs distributions and can live/deal with the problems that might occur, but I don't. Conclusion: Only use the preconfigured emacs distributions if you know what your dealing with.
-* Code-Examples
+- I'm on windows and on a slow pc. Therefore packages that are not working fast on windows (i.e. because they use extensive process-forking, which is non-existent on windows) are not used no matter how useful they might be. Also some packages do not work properly because they use (on windows) not properly implemented back-ends, like terminals and shells.
+- I have a certain, limited, workflow, that involves the use of windows specific apps, like windows-explorer. Because of that and things mentioned above some packages, like projectile, although very useful by themselves, have no use for me.
+- I try to be use packages that fit within the basic Emacs concepts. Although Emacs can be bend beyond recognition does not mean I like that. So packages like helm and evil are not for me. I have installed evil, but this is just for training purposes since you can't escape vim completely.
+- A word on Spacemacs/Prelude and similar Emacs distributions. First especially Spacemacs is geared towards vi users and programmers. Currently I don't want both. All preconfigured Emacs distributions contain a lot of stuff I don't need or want. First, this extra bloat causes unnecessary slowdown. The second problem is that every package in Emacs can fail or misbehave. This accumulates with the number of packages. Therefore IMHO the best option is to have a slim Emacs only with packages that you need or at least understand their use. There might be users who can harness the advantages of these preconfigured Emacs distributions and can live/deal with the problems that might occur, but I don't. Conclusion: Only use the preconfigured Emacs distributions if you know what your dealing with.
+- My configuration is always WIP, so some inconsistencies might occur. Some problems I describe might be non-existent when you read it since all packages and programs are improved over time.
+* Examples
 ** Latex
 #+begin_src latex :file fsa.pdf :packages '(("" "tikz")) :border 1em
   % Define block styles
@@ -22,28 +23,67 @@
           (3) edge [loop above] node {(a, b)} (3);
   \end{tikzpicture}
 #+end_src
-* External Text-Files
-** Windows Example-Shortcuts
-*** Client - not waiting for server, opening frame and starting as daemon if not yet done
-emacsclientw.exe -n -c -a ""
-*** Full Application in Debugging Mode
-runemacs.exe -debug-init
-*** Client - not waiting for server, opening frame and starting as daemon if not yet done, switching to temp buffer and adding a dated entry
-emacsclientw.exe -n -c -a ""  -e "(my-timestamper-for-temp)" -F "((fullscreen . maximized))"
-** Batch Files
-Save as .bat files and execute where needed
-*** Convert .txt and .cfg Files to .org
-REM Uses foldername as top level and filenames as secondary level
-for %%* in (.) do (echo * %%~nx* >> output.org)
-for /r %%i in (*.txt) (*.cfg) do (
-if not %%~nxi == output.org (
-echo ** %%~nxi >> output.org
-type "%%i" >> output.org
-echo. >> output.org
-)
-)
+** Org-plot
+#+PLOT: title:"example table" ind:1 type:2d with:lines
+#+tblname: data-plot
+| independent var | first dependent var | second dependent var |
+|-----------------+---------------------+----------------------|
+|             0.1 |               0.425 |                0.375 |
+|             0.2 |              0.3125 |               0.3375 |
+|             0.3 |          0.24999993 |           0.28333338 |
+|             0.4 |               0.275 |              0.28125 |
+|             0.5 |                0.26 |                 0.27 |
+|             0.6 |          0.25833338 |           0.24999993 |
+|             0.7 |          0.24642845 |           0.23928553 |
+|             0.8 |             0.23125 |               0.2375 |
+|             0.9 |          0.23333323 |            0.2333332 |
+|               1 |              0.2225 |                 0.22 |
+|             1.1 |          0.20909075 |           0.22272708 |
+|             1.2 |          0.19999998 |           0.21458333 |
+|             1.3 |          0.19615368 |           0.21730748 |
+|             1.4 |          0.18571433 |           0.21071435 |
+|             1.5 |          0.19000008 |            0.2150001 |
+|             1.6 |           0.1828125 |            0.2046875 |
+|             1.7 |          0.18088253 |            0.1985296 |
+|             1.8 |          0.17916675 |           0.18888898 |
+|             1.9 |          0.19342103 |           0.21315783 |
+|               2 |                0.19 |              0.21625 |
+|             2.1 |          0.18214268 |           0.20714265 |
+|             2.2 |          0.17727275 |            0.2022727 |
+|             2.3 |           0.1739131 |            0.1989131 |
+|             2.4 |          0.16770833 |            0.1916667 |
+|             2.5 |               0.164 |                0.188 |
+|             2.6 |          0.15769238 |           0.18076923 |
+|             2.7 |           0.1592591 |            0.1888887 |
+|             2.8 |           0.1598214 |           0.18928565 |
+|             2.9 |          0.15603453 |            0.1844828 |
+
+#+begin_src gnuplot :var data=data-plot :exports both :file data-plot.svg
+reset
+set title "example table"
+set xlabel "X"
+set ylabel "Y"
+
+plot data u 1:2 w l lw 1 title 'first dependent var', \
+     data u 1:3 w l lw 1 title 'second dependent var'
+#+end_src
+** Graphviz
+#+BEGIN_SRC dot :file dotsuccess.svg :cmdline -Kdot -Tsvg
+digraph hierarchy {
+
+		nodesep=1.0 // increases the separation between nodes
+		
+		node [color=Red,fontname=Courier,shape=box] //All nodes will this shape and colour
+		edge [color=Blue, style=dashed] //All the lines look like this
+
+		Headteacher->{Deputy1 Deputy2 BusinessManager}
+		Deputy1->{Teacher1 Teacher2}
+		BusinessManager->ITManager
+		{rank=same;ITManager Teacher1 Teacher2}  // Put them on the same level
+}
+#+END_SRC
 ** Compile-example of pdf-tools-installation
-#+BEGIN_SRC browser :out pdf-tools.png
+#+BEGIN_SRC html
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <!-- Created by htmlize-1.54 in css mode. -->
 <html>
@@ -321,15 +361,443 @@ Comint finished at Tue Apr 24 04:06:01
 </pre>
   </body>
 </html>
-
 #+END_SRC
-
-#+RESULTS:
-[[file:pdf-tools.pdf]]
-
+** Batch file Convert .txt and .cfg Files to .org, Save as .bat and execute where needed
+#+BEGIN_SRC shell
+REM Uses foldername as top level and filenames as secondary level
+for %%* in (.) do (echo * %%~nx* >> output.org)
+for /r %%i in (*.txt) (*.cfg) do (
+if not %%~nxi == output.org (
+echo ** %%~nxi >> output.org
+type "%%i" >> output.org
+echo. >> output.org
+)
+)
+#+END_SRC
 * Installation Instructions
+** Installation
+*** Emacs
+**** Purpose and General-Information
+Editor itself
+**** Download and Installation
+https://ftp.gnu.org/pub/gnu/emacs/windows/emacs-XX/emacs-XX.X-x86_64.zip
+- Extract Emacs to dir, then the deps also into it.
+- Run /bin/addpm.exe as Adminstrator. Click yes.
+*** MSYS2
+**** Purpose and General-Information
+Offers Posix-Terminal, shell, cli package-manager and a a large number of packages
+**** Package Handling
+- To install a package invoke pacman -S PACKAGENAME-OR-PACKAGEGROUP
+- Remove a package and unneeded dependencies invoke pacman -Rs PACKAGENAME-OR-PACKAGEGROUP
+- Updates of all installed packages can be done by manually invoking "pacman -Syuu"
+**** Download and Installation
+http://www.msys2.org/
+- Download latest msys2-x86_64-XXXXXXXX.exe
+- Default Installation then open a mintty terminal and execute "pacman -Syuu" directly after installation.
+- The step above might be repeated if mintty and/or pacman get updated. If they are the terminal might be needed to be closed and reopened before the command is repeated. You will get a message in the terminal if this needs to be done.
+- If it needs to be done kill the terminal, NOT by executing "exit" rather than by pressing the X button on the window
+- Add pathes to user-PATH variable as instructed in config-specific-XXXX.org
+- Reboot after all packages were installed, this should make sure all environment variables get activated
+- Execute "updatedb" for the locate program to work correctly add a windows task to the scheduler that this is done daily containing C:\msys2\bin\mintty.exe -e 'updatedb --localpaths='//c/'
+- You can check with "locale" command the locale environment variables and with env the other variables
+- Copy configuration file templates to the home folder. They are located in /etc/skel
+- Execute "ssh-keygen" in a terminal. This sets up basic ssh configuration and creates folders and files for ssh.
+- To inherit Window PATH(s) in terminals uncomment in C:/msys64/mingw64.ini the line "MSYS2_PATH_TYPE=inherit"
+***** .bashrc
+Add variables below to .bashrc file inside your home directory. Use the touch command to generate the file.
+#+BEGIN_SRC shell
+  #
+  # Set Language
+  export LANG=de_DE.UTF-8
+  export LC_ALL=de_DE.UTF-8
+  #
+  # Set Prompt
+  PS1="\[\e[32m\]\u@\h \[\e[33m\]\w\[\e[0m\]\n\$"
+  #
+  # Avoid duplicates in history
+  export HISTCONTROL=ignoredups:erasedups
+  #
+  # VIM Alias
+  alias vi=vim
+  alias ll='ls -l --color'
+  alias h=history
+#+END_SRC
+***** Adding your windows user to Msys2 and setting home, which also sets the HOME variable based on the user
+****** Execute following commands in mintty terminal
+mkgroup > /etc/group
+mkpasswd -cl > /etc/passwd
+****** Check
+Open /etc/passwd check that you username was added
+****** Set absolute Msys2 path and change default shell
+edit /etc/passwd file and change /bash to /fish or /zsh if you are using different shells
+***** Add string below to (HOME-Directory)\.ssh\config in order to avoid problems when using a local proxying application which connects to different hosts using localhost
+Host 127.0.0.*
+   StrictHostKeyChecking no
+   UserKnownHostsFile=/dev/null
+**** Recommended Packages
+- Install via pacman -S PACKAGENAME
+- pacman -Q PACKAGENAME or pacman -Qg PACKAGEGROUP gives you information
+- Msys2 Ghostscript does not seem to be able to show a printing dialog after postscript printing
+***** Groups
+****** base (preinstalled)
+Contains basic msys2 installation.
+******* Packages
+bash
+bash-completion
+bsdcpio
+bsdtar
+bzip2
+coreutils
+curl
+dash
+dtc
+file
+filesystem
+findutils
+flex
+gawk
+gcc-libs
+getent
+grep
+gzip
+inetutils
+info
+less
+libargp
+lndir
+mintty
+msys2-keyring
+msys2-launcher-git
+msys2-runtime
+ncurses
+pacman
+pacman-mirrors
+pactoys-git
+pax-git
+pkgfile
+rebase
+sed
+tftp-hpa
+time
+ttyrec
+tzcode
+util-linux
+which
+****** compression
+Some Emacs packages need to extract downloaded content.
+******* Packages
+bzip2
+gzip
+liblzo2
+p7zip
+tar
+unzip
+xz
+zip
+****** base-devel
+All tools required for compiling. Some Emacs packages need to compile files.
+******* Packages
+asciidoc
+autoconf
+autoconf2.13
+autogen
+automake-wrapper
+automake1.10
+automake1.11
+automake1.12
+automake1.13
+automake1.14
+automake1.15
+automake1.16
+automake1.6
+automake1.7
+automake1.8
+automake1.9
+bison
+diffstat
+diffutils
+dos2unix
+file
+flex
+gawk
+gdb
+gettext
+gettext-devel
+gperf
+grep
+groff
+help2man
+intltool
+lemon
+libtool
+libunrar
+libunrar-devel
+m4
+make
+man-db
+pacman
+pactoys-git
+patch
+patchutils
+perl
+pkg-config
+pkgfile
+quilt
+rcs
+scons
+sed
+swig
+texinfo
+texinfo-tex
+ttyrec
+unrar
+wget
+xmlto
+****** mingw-w64-x86_64-toolchain
+For compiling 64bit programs.
+******* Packages
+mingw-w64-x86_64-binutils
+mingw-w64-x86_64-crt-git
+mingw-w64-x86_64-gcc
+mingw-w64-x86_64-gcc-fortran
+mingw-w64-x86_64-gcc-libgfortran
+mingw-w64-x86_64-gcc-libs
+mingw-w64-x86_64-gdb
+mingw-w64-x86_64-headers-git
+mingw-w64-x86_64-libmangle-git
+mingw-w64-x86_64-libwinpthread-git
+mingw-w64-x86_64-make
+mingw-w64-x86_64-pkg-config
+mingw-w64-x86_64-tools-git
+mingw-w64-x86_64-winpthreads-git
+mingw-w64-x86_64-winstorecompat-git
+****** net-utils
+******* Packages
+elinks-git
+lftp
+mosh
+mutt
+nettle
+openssh
+rsync2
+sshpass
+w3m
+***** Single
+****** ca-certificates
+Required for ssl operations
+****** clang
+Alternative C-Compiler zu gcc
+****** fish
+Oh-my-fish
+https://github.com/oh-my-fish/oh-my-fish
+Download Oh-my-fish via curl using the script below
+curl -L https://get.oh-my.fish | fish
+Edit /etc/fish/fish.conf in the same way as .bashrc mentioned above
+****** git
+Defacto standard of version control
+****** mingw-w64-x86_64-hunspell
+Most current spellchecker available
+- Hunspell requires the setting of the DICPATH environment variable in Windows, otherwise dictionaries won't be found by emacs. See config-specific-XXXX.org
+- Install mingw-w64-x86_64-hunspell-en
+- huspell-de is missing. Download the latest dict from libre-office extensions repository https://extensions.libreoffice.org/extensions/german-de-de-frami-dictionaries and install the .dic and .aff files into C:\msys64\mingw64\share\myspell\dicts
+- huspell-fr is missing. Download the latest dict from libre-office extensions repository https://extensions.libreoffice.org/extensions/dictionnaires-francais/5.7 and installed the .dic and .aff files into C:\msys64\mingw64\share\myspell\dicts
+****** inetutils
+Contains the following programs, despite being not a group: telnet(d), ftp(d), talk(d), tftp(d), uucpd, sylogd
+****** netcat
+nc command to test connections
+****** python
+Python Programming Language
+****** tmux
+Terminal Multiplexing
+******* Start mintty using this command
+C:\msys64\usr\bin\mintty.exe -e '%HOME%\start-tmux.sh' -
+******* start-tmux.sh
+#!/bin/fish
+tmux
+******* .tmux.conf (Save file in Unix-Format, otherwise CRLF might not be interpreted correcty)
+#+BEGIN_SRC shell
+# Window-Switching without prefix
+bind-key -n S-Left previous-window
+bind-key -n S-Right next-window
+
+# Pane-Switching without prefix
+bind -n M-Left select-pane -L
+bind -n M-Right select-pane -R
+bind -n M-Up select-pane -U
+bind -n M-Down select-pane -D
+
+# Activate mouse (Causes font resize using C+mouse-wheel to stop working, CS+mouse-wheel still works)
+set -g mouse on
+
+# Show information in title-bar
+set -g set-titles on
+
+# Set Terminal to use 256 colors
+set -g default-terminal "screen-256color"
+
+# Statusbar/window configuration
+set -g status-interval 1
+set -g status-fg white
+set -g status-bg colour240
+set -g status-justify centre
+set -g status-left '#[fg=green][#[fg=red]#S#[fg=green]]#[default]'
+set -g status-right '#[fg=green][#[fg=colour214]%d.%m.%y %H:%M:%S#[fg=green]]#[default]'
+setw -g window-status-current-format '#[fg=green](#[fg=yellow]#I.#P#F#W#[fg=green])#[default]'
+setw -g window-status-format '#I#F#W'
+
+# Install TPM using git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
+# List of plugins
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+
+# Install cygutils-extra for tmux-yank
+set -g @plugin 'tmux-plugins/tmux-yank'
+
+# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+run -b '~/.tmux/plugins/tpm/tpm
+#+END_SRC
+****** whois
+whois - standard tool to lookup domains
+****** vim
+- Test vim commands locally if needed
+- Vim needs to be called by executing "vim" not "vi" if no alias is defined
+****** zsh
+Oh-my-zsh
+https://github.com/ohmyzsh/ohmyzsh
+Download Oh-my-zsh via curl using the script below
+#+BEGIN_SRC bash
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+#+END_SRC
+****** fzy
+Fuzzy searching
+****** iperf3
+Check network performance
+****** winpty
+Fixes PTY
+****** mingw-w64-x86_64-go
+Go Programming Language
+****** mingw-w64-x86_64-imagemagick
+Allows Blimp to work
+****** mingw-w64-x86_64-graphviz
+Required for org-mind-map and dot language code
+****** mingw-w64-x86_64-gnuplot
+Ability to create graphs from data as file or directly to display.
+****** mingw-w64-x86_64-tidy
+Cleanup html code
+***** Additional libraries for compiling pdf-tools
+mingw-w64-x86_64-zlib
+mingw-w64-x86_64-libpng
+mingw-w64-x86_64-poppler
+***** Python pip
+Python package installer
+****** Update Pip and basic packages
+pip install --upgrade pip setuptools wheel
+****** Install/Uninstall a package
+pip install PACKAGENAME
+pip uninstall PACKAGENAME
+****** List installed packaes
+pip list
+****** List outdated packages
+pip list --outdated
+****** Upgrade packages
+pip install --upgrade PACKAGENAME
+****** Recommended Packages
+- td-watson (call using "watson" command)
+- python-language-server
+- jedi
+- pylint
+- pyflake
+*** Misc Support Tools
+**** Dig
+***** Purpose and General-Information
+Modern DNS-Query Tool
+***** Download and Installation
+https://downloads.isc.org/isc/bind9/9.15.7/BIND9.15.7.x64.zip
+**** Ditaa
+***** Purpose and General-Information
+Diagramm Creator from Text
+***** Download and Installation
+https://github.com/stathissideris/ditaa
+- Download and unzip latest version to a folder
+- Set Path in specific.org
+- This app requires JRE installed
+**** Fakecygpty
+***** Purpose and General-Information
+Fixes shell problems in emacs when shell is based on MSYS2 mintty
+***** Download and Installation
+https://github.com/d5884/fakecygpty
+- Compile using the command autoreconf -ivf && ./configure && make install
+- copy fakecygpty.el into ~/.emacs.d/myscripts/
+- evaluate (fakecygpty-activate) via use-package
+**** Ghostscript
+***** Purpose and General-Information
+- Postscript suite required to enable postscipt processing for printing produced by emacs and it's packages.
+- Can produce pdfs from postscript
+***** Download and Installation
+- https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/
+- Download gsXXXw64.exe
+- Install in C:/Program Files/gs/ not C:/Program Files/gs/gsXX.XX/ This avoids reconfiguration after update
+**** Miktex
+***** Purpose and General-Information
+Tex-Environment required in order to process latex produced by org mode and other packages.
+***** Download and Installation
+http://miktex.org/download
+- Download basic-miktex-X.X.XXXX-x64.exe
+- Select "Install missing packages on the fly" during installation
+- Export an org file once as pdf in order to download the additional needed files  C-c C-e l o
+**** Notpad++
+***** Purpose and General-Information
+This might look strange, but in case of an emergency, i.e. Emacs is not starting up, this editor might save the day.
+***** Download and Installation
+https://notepad-plus-plus.org/
+**** Pandoc
+***** Purpose and General-Information
+Powerful Document Converter
+***** Download and Installation
+https://github.com/jgm/pandoc/releases/
+- Download and install pandoc-X.XX.X-windows.msi
+**** Reveal.js
+***** Purpose and General-Information
+For visually pleasant presentation export
+***** Download and installation
+https://github.com/hakimel/reveal.js/releases
+- Extract Source to folder named "reveal.js" Put the "reveal.js" folder in the same folder as the presentation.org
+- Execute M-x org-reveal-export-to-html to export to html, open manually in Browser
+**** Ripgrep
+***** Purpose and General-Information
+Fast search through files
+***** Download and Installation
+https://github.com/BurntSushi/ripgrep/releases
+- Download and unzip latest version to a folder
+- Add folder path to PATH variable
+**** Sharp-Keys
+***** Purpose and General-Information
+This app should be used to remap buttons on the OS-Level. Configuations depends on the keyboard used. I recommend:
+- Capslock to Apps (Menu-Key)
+***** Download and Installation
+https://github.com/randyrants/sharpkeys
+**** Source-Code-Pro-Font
+***** Purpose and General-Information
+Better readable default font
+***** Download and installation !Check if otf-cff2 is now supported!
+https://github.com/adobe-fonts/source-code-pro/releases/
+- Download latest ttf Version of the font, otf-cff2 version currently does not work on Windows
+- Extract and install in C:\Windows\Fonts
+**** Symbola-Font !Needs Revision! !License Change+Probably not needed anymore!
+***** Purpose and General-Information
+Better Unicode Symbol Support
+***** Download and installation
+http://users.teilar.gr/~g1951d/
+- Extract and install in C:\Windows\Fonts
+**** WinCompose
+***** Purpose and General-Information
+This app uses AltGr as a compose key. The compose key allows access to various symbols using a key combination.
+***** Download and installation
+https://github.com/samhocevar/wincompose
 ** Windows Registration
-*** Save as .reg files and execute once
+Save as .reg files and execute once
+*** General
 **** Register-Emacs-Client.reg
 Windows Registry Editor Version 5.00
 
@@ -445,7 +913,8 @@ Windows Registry Editor Version 5.00
 @="EmacsFile"
 "Content Type"="text/plain"
 "PerceivedType"="text"
-**** Register-the-Outlook-URL-Handler.reg
+*** Outlook
+***** Register-the-Outlook-URL-Handler.reg
 Windows Registry Editor Version 5.00
 
 [HKEY_CLASSES_ROOT\outlook]
@@ -461,7 +930,7 @@ Windows Registry Editor Version 5.00
 
 [HKEY_CLASSES_ROOT\outlook\shell\open\command]
 @="\"%OUTLOOK4E%\\OUTLOOK.EXE\" /select \"%1\""
-**** Org Protocol
+***** Org Protocol
 Windows Registry Editor Version 5.00
 
 [HKEY_CLASSES_ROOT\org-protocol]
@@ -470,329 +939,62 @@ Windows Registry Editor Version 5.00
 [HKEY_CLASSES_ROOT\org-protocol\shell]
 [HKEY_CLASSES_ROOT\org-protocol\shell\open]
 [HKEY_CLASSES_ROOT\org-protocol\shell\open\command]
-@="\"C:\\!Software\\Portable\\Emacs\\bin\\emacsclientw.exe\" \"%1\""
-**** Fix-RDP-Cursorblink.reg
-Windows Registry Editor Version 5.00
-
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server]
-"CursorBlinkEnable"=dword:00000001
-*** Use-Google-Maps-in-Outlook-2010-Contacts.reg
+@="\""%EMACS%\\bin\\emacsclientw.exe\" \"%1\""
+***** Use-Google-Maps-in-Outlook-Contacts.reg
 Windows Registry Editor Version 5.00
 
 [HKEY_CURRENT_USER\Software\Microsoft\Office\16.0\Outlook\Options\General]
 "MapScriptURL"="http://maps.google.com/?q=<0s>, <1s>, <2s>, <3s>, <4s>"
-** Download and install current version of
-*** Dig
-Modern DNS-Query Tool
-http://ftp.isc.org/isc/bind9/cur/
-Install with "Tools only" option
-*** Ditaa
-**** Purpose and General-Information
-- Diagramm Creator from Text
-**** Download and Installation
-- https://github.com/stathissideris/ditaa
-- Download and unzip latest version to a folder
-- Set Path in specific.org
-- This app requires Java Runtime installed
-*** Fakecygpty
-**** Purpose and General-Information
-Fixes shell problems in emacs when shell is based on mintty running on MSYS2 or Cygwin
-**** Download and Installation
-- Download fakecygpty from https://github.com/d5884/fakecygpty
-- Compile using the command autoreconf -ivf && ./configure && make install
-- copy fakecygpty.el into ~/.emacs.d/myscripts/
-- evaluate (fakecygpty-activate) via use-package
-*** Ghostscript 64bit
-**** Purpose and General-Information
-- Postscript suite required to enable postscipt processing for printing produced by emacs and it's packages.
-- Can produce pdfs from postscript
-**** Download and Installation
-- https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/
-- Download gsXXXw64.exe
-- Install in C:/Program Files/gs/ not C:/Program Files/gs/gsXX.XX/ This avoids reconfiguration after update
-*** Gnuplot
-**** Purpose and General-Information
-Ability to create graphs from data as file or directly to display.
-**** Download and Installation
-- Download Portable version from https://sourceforge.net/projects/gnuplot/files/gnuplot/
-- Add Path to User-PATH
-- Download both gnuplot and gnuplot-mode from melpa. See instructions in config file for gnuplot.
-*** Graphviz
-**** Purpose and General-Information
-- Required for org-mind-map
-**** Download and Installation
-- http://graphviz.org/Download_windows.php
-- Download graphviz-X.XX.msi
-- Install executable under .../Graphviz/ not /.../GraphvizX.XX//
-- add ...\Graphviz\bin to your PATH variable
-*** ImageMagick
-**** Purpose and General-Information
-- Allows Image Dired Thumbnail Mode to work
-**** Download and installation
-- Do NOT download ImageMagick 7.X since it is not yet supported in Emacs. 6.X is still supported by ImageMagick. Unofficial Emax64 contains ImageMagick 7.
-- Source https://www.imagemagick.org/download/binaries/ImageMagick-6.9.X-X-Q16-x64-dll.exe
-- Install without any options, except adding path the System PATH
-*** Miktex 64bit
-**** Purpose and General-Information
-- Tex-Environment required in order to process latex produced by org mode and other packages.
-**** Download and Installation
-- http://miktex.org/download
-- Download basic-miktex-X.X.XXXX-x64.exe
-- Select "Install missing packages on the fly" during installation
-- Export an org file once as pdf in order to download the additional needed files  C-c C-e l o
-*** MSYS2 64bit
-**** Purpose and General-Information
-- To have latest unix-tools in 64bit
-- Library-numbers might increase over time
-- Remove a package and unneeded dependencies execute pacman -Rs PACKAGENAME
-- Updates of all installed pacakages have to be done manually by executing "pacman -Syuu" again
-**** Download and Installation
-- Source http://www.msys2.org/
-- Download latest msys2-x86_64-XXXXXXXX.exe
-- Default Installation then open a mintty terminal and execute "pacman -Syuu"
-- Kill the terminal, NOT by executing "exit" rather than by pressing the X button on the window
-- Execute "pacman -Syuu" again
-- Execute "pacman -S tmux fish zsh zsh-doc screenfetch pwgen tree compression net-utils inetutils gnu-netcat whois mingw-w64-x86_64-hunspell mingw-w64-x86_64-hunspell-en base-devel mingw-w64-x86_64-toolchain msys2-devel sys-utils" to add extra-packages mentioned below
-- Add C:\msys64\mingw64\bin and C:\msys64\usr\bin to your PATH variable in this order
-- Reboot after all packages were installed, this should make sure all environment variables get set correctly
-- Execute "updatedb" for the locate program to work correctly add a windows task to the scheduler that this is done daily containing Z:\Tools\cygwin64\bin\mintty.exe -e 'updatedb -localpaths='//z// //c//'
-- copy default settings files like .bashrc from ? to your home directory
-- still missing: bind-utils (dig), ipcalc, hunspell-de
-***** add variables below to .bashrc inside your home directory
-#
-# Set Language
-export LANG=de_DE.UTF-8
-export LC_ALL=de_DE.UTF-8
-#
-# Set Prompt
-PS1="\[\e[32m\]\u@\h \[\e[33m\]\w\[\e[0m\]\n\$"
-#
-# Avoid duplicates in history
-export HISTCONTROL=ignoredups:erasedups
-#
-# VIM Alias
-alias vi=vim
-***** Checking
-You can check with "locale" command the locale environment variables and with env the other variables
-***** Extra-Packages Details
-****** Compression
-required for some packages to extract downloaded content
-****** Clang
-Installs C++ Compiler
-****** Git
-version control
-****** Programming
-base-devel - all tools required for compiling. Some packages need to compile files.
-python - python
-libcrypt-devel - required for installing pylint via pip
-****** Python3 pip3 - python package installer
-******* Update Pip3 and basic packages
-pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --upgrade pip setuptools wheel
-******* Install a package
-pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org PACKAGENAME
-******* List installed packaes
-pip3 list
-******* List outdated packages
-pip3 list --trusted-host pypi.org --trusted-host files.pythonhosted.org --outdated
-******* Upgrade packages
-pip3 install --trusted-host pypi.org --trusted-host files.pythonhosted.org --upgrade PACKAGENAME
-******* Recommended Packages
-- td-watson
-- pylint
-- proselint
-****** Inetutils
-inetutils containing telnet(d), ftp(d), talk(d), tftp(d), uucpd, sylogd
-****** Netcat
-nc command to test connections
-****** Openssh
-openssh - standard ssh client and server
-****** RSync
-rsync - standard program to sync files
-****** Shells
-fish
-Edit /etc/fish/fish.conf in the same way as .bashrc mentioned above
-******* zsh - Oh-my-zsh
-Website: https://github.com/robbyrussell/oh-my-zsh
-Download Oh-my-Zsh via curl from the URL below
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
-****** Spellchecking
-- hunspell - most current spellchecker available
-- Hunspell requires the setting of the DICPATH environment variable in Windows, otherwise dictionaries won't be found by emacs. See specific.org
-- huspell-de is missing download the latest dict from libre-office extensions repository https://extensions.libreoffice.org/extensions/german-de-de-frami-dictionaries and installed the .dic and .aff files into C:\msys64\mingw64\share\myspell\dicts
-- huspell-fr is missing download the latest dict from libre-office extensions repository https://extensions.libreoffice.org/extensions/dictionnaires-francais/5.7 and installed the .dic and .aff files into C:\msys64\mingw64\share\myspell\dicts
-****** Terminal Multiplexing
-tmux
-******* Start mintty using this command
-C:\msys64\usr\bin\mintty.exe -e 'Z:\home\jlange\start-tmux.sh' -
-******* start-tmux.sh
-#!/bin/fish
-tmux
-******* .tmux.conf (Save file in Unix-Format, otherwise CRLF might not be interpreted correcty)
-# Window-Switching without prefix
-bind-key -n S-Left previous-window
-bind-key -n S-Right next-window
+*** Fix-RDP-Cursorblink
+Windows Registry Editor Version 5.00
 
-# Pane-Switching without prefix
-bind -n M-Left select-pane -L
-bind -n M-Right select-pane -R
-bind -n M-Up select-pane -U
-bind -n M-Down select-pane -D
-
-# Activate mouse (Causes font resize using C+mouse-wheel to stop working, CS+mouse-wheel still works)
-set -g mouse on
-
-# Show information in title-bar
-set -g set-titles on
-
-# Set Terminal to use 256 colors
-set -g default-terminal "screen-256color"
-
-# Statusbar/window configuration
-set -g status-interval 1
-set -g status-attr bright
-set -g status-fg white
-set -g status-bg colour240
-set -g status-justify centre
-set -g status-left '#[fg=green][#[fg=red]#S#[fg=green]]#[default]'
-set -g status-right '#[fg=green][#[fg=colour214]%d.%m.%y %H:%M:%S#[fg=green]]#[default]'
-setw -g window-status-current-format '#[fg=green](#[fg=yellow]#I.#P#F#W#[fg=green])#[default]'
-setw -g window-status-format '#I#F#W'
-****** Version-Control
-ca-certificates - required for ssl operations
-****** Vim - Test vim commands locally if needed
-vim - needs to be called by executing "vim" not "vi" if no alias is defined
-****** Whois
-whois - standard tool to lookup domains
-****** Zip
-not part of compression, required for odt export 
-**** Adding your windows user to cygwin and setting home, which also sets the HOME variable based on the user
-***** Execute following commands in cygwin terminal:
-mkgroup > /etc/group
-mkpasswd -cl > /etc/passwd
-***** Check
-Open /etc/passwd check that you username was added
-***** Set absolute cygwin path and change default shell
-edit /etc/passwd file and change /bash to /fish or /zsh
-**** Improve git speed, in Windows by executing
-git config --global core.fscache true
-**** Configuration files
-Copy configuration file templates to the home folder. They are located in /etc/skel
-**** Add string below to (HOME-Directory)\.ssh\config in order to avoid problems when using a local proxying application which connects to different hosts using localhost
-Host 127.0.0.*
-   StrictHostKeyChecking no
-   UserKnownHostsFile=/dev/null
-**** Inherit the PATH
-uncomment in mingw64 .ini the inherit path line
-**** Setup SSH
-- Execute in terminal: ssh-keygen
-- This sets up basic ssh configuration and creates folders and files
-*** Notpad++
-This might look strange, but in case of an emergency, i.e. Emacs is not starting up, this editor might save the day.
-https://notepad-plus-plus.org/
-*** NT-Emacs 64bit
-**** Emacs
-***** Purpose and General-Information
-- Editor itself
-***** Download and Installation
-https://ftp.gnu.org/gnu/emacs/windows/emacs-XX.X-x86_64-w64-mingw32.zip
-https://ftp.gnu.org/gnu/emacs/windows/emacs-XX-x86_64-deps.zip
-- Extract Emacs to dir, then the deps also into it.
-- Run /bin/addpm.exe as Adminstrator. Click yes.
-*** Pandoc
-**** Purpose and General-Information
-- Document Converter
-**** Download and Installation
-- https://github.com/jgm/pandoc/releases/
-- Download and install pandoc-X.XX.X-windows.msi
-*** PhantomJS
-Required for OB-Browser
-http://phantomjs.org/download.html
-*** Reveal.js
-**** Purpose and General-Information
-- For visually pleasant presentation export
-**** Download and installation
-- Source https://github.com/hakimel/reveal.js/releases
-- Extract Source to folder named "reveal.js" Put the "reveal.js" folder in the same folder as the presentation.org
-- Execute M-x org-reveal-export-to-html to export to html, open manually in Browser
-*** Ripgrep
-**** Purpose and General-Information
-- Fast search through files
-**** Download and Installation
-- https://github.com/BurntSushi/ripgrep/releases
-- Download and unzip latest version to a folder
-- Add folder path to PATH variable
-*** Sharp-Keys
-This app should be used to remap buttons on the OS-Level. Configuations depends on the keyboard used. I recommend:
-Capslock to Right-Windows-Keys
-Calc to Apps (Apps is the "Menu-Key")
-https://github.com/randyrants/sharpkeys
-*** Source-Code-Pro-Font
-**** Purpose and General-Information
-- Better readable default font
-**** Download and installation
-- Source https://github.com/adobe-fonts/source-code-pro/releases/
-- Extract and install in C:\Windows\Fonts
-*** Symbola-Font
-**** Purpose and General-Information
-- Better Unicode Symbol Support
-**** Download and installation
-- Source http://users.teilar.gr/~g1951d/
-- Extract and install in C:\Windows\Fonts
-
-*** WinCompose
-This app uses AltGr as a compose key. The compose key allows access to various symbols using a key combination.
-https://github.com/samhocevar/wincompose
-** Add Putty to the Windows-Environment User PATH-Variables if you want to use the Putty command line tools like plink
-*** Location to add
-Control Panel\All Control Panel Items\System\Advanced System settings\Environment Variables\User Variables for (YourUsername)
-*** Path to add to the PATH varible in location above (Adjust to your installation)
-C:\Program Files\Putty\
-*** Check
-use "env" command to check
-** Registration Files
-- Save Content of registration files in specific.org in .reg files
-- Adjust paths inside reg-file to your installation
-- Execute once
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server]
+"CursorBlinkEnable"=dword:00000001
+** Windows Shortcuts
+*** Client - not waiting for server, opening frame and starting as daemon if not yet done
+emacsclientw.exe -n -c -a ""
+*** Full Application in Debugging Mode
+runemacs.exe -debug-init
+*** Client - not waiting for server, opening frame and starting as daemon if not yet done, switching to temp buffer and adding a dated entry
+emacsclientw.exe -n -c -a ""  -e "(my-timestamper-for-temp)" -F "((fullscreen . maximized))"
 ** Emacs-Dot-Files
 *** init.el (Main-Loader)
-- Copy init.el from this archive to ~\.emacs.d\
-*** custom.el (Custom-System writes here)
-- Copy custom.el from this archive to ~\.emacs.d\
-*** configuration.org (Main configuration-File from which configuration.el is generated and then loaded by init.el)
-- Put configuration.org file in ~\org\active\ (Create neccessary folders)
-*** specific.org (Additional configuration-File from which specific.el is generated and then loaded by init.el)
-- Put specific.org file also in ~\org\active\
+- Contains only the necessecary information to load files below.
+- Place in ~\.emacs.d\
+*** custom.el (Emacs custom-system writes here)
+- Must contains only installed package information. Custom Parameters set by use-package get sometimes written here, but can be deleted (except the package information)
+- Place in ~\.emacs.d\
+*** config-general.org
+- Main configuration-file from which config-general.el is generated automatically by org-babel and then loaded by init.el
+- Put config-general.org file in ~\org\ (Create neccessary folders)
+*** config-specific-XXXX.org
+- Additional configuration file from which config-specific-XXXX.el is generated automatically by org-babel and then loaded by init.el
+- Put specific.org file also in ~\org\
 - Edit to your needs, since it contains installations-specific configuration parts
 ** Other Instructions
-- Open %windir%\system32\SystemPropertiesPerformance.exe and disable "Animate windows when mini...", this also disables the Switch virtual Desktop animation
-- Keycords involving Alt-Gr, like "C-M \" (region-intent) require you to use the right control key in order to work
-- The package use-packages installs the required packages after it installed itself and its requirements though the boostrap code.
-- Reboot after first completion of steps above
-- If org files look that is something missing, mostly after loading, just fold and unfold at top level
-- Create all the files in Org folder that are mentioned in the .emacs
-- Create diary file in your home dir, not in .emacs.d dir
-- Uncomment debug on error if needed
-- You can run profiler start and profiler report, profiler stop for a comprehensive list of functions that were called. Press d in the report to get the definition.
-- Take ownership of ~/emacs.d/server . Adminstrator->YourUser . Otherwise you get errors at server-start.
-- If desktop is not loaded check home for .emacs.desktop.lock file and delete it (when emacs is not running)
-- Be sure your user is direct owner of the home directory and all subfiles/subdirectories. Otherwise the client may not start.
+*** Disable Virtual Desktop Switch Animation
+Open %windir%\system32\SystemPropertiesPerformance.exe and disable "Animate windows when mini...", this also disables the Switch virtual Desktop animation
+*** Input Keycords containing AltGR
+To input keycords combinations first press AltGR then RIGHT-Control (and or Alt), then the letter. Some combinations will not work even when done so.
+*** Modifier
+The Apps key gives you a full modifier, meaning it won't repeat itself when pressed. It works like control/shift/alt. Same goes with LWindows or RWindows. Be aware that some combinations can't be registered by Emacs, they are permanently bound to the Windows OS, like Windows+L, which locks the PC.
+*** Seemingly corrupted org files
+If org files look that is something missing, mostly after loading, just fold and unfold at top level
+*** Desktop not loading
+If desktop is not loaded check ~/.emacs.d/ for .emacs.desktop.lock file and delete it (when emacs is not running)
+*** Ownership of home directory
+Be sure your user is direct owner of the home directory and all subfiles/subdirectories. Otherwise the client may not start.
 ** Known issues/broken stuff
-*** Remote-Terminals
+*** Terminals 
 - Mostly broken, the implementation of terminals in emacs is geared towards a POSIX system and not towards windows. Don't waste your time. A reimplementation is not in sight.
 - Workaround: Use standard putty or kitty, for file transfer use win-scp
 *** Shells
-- shell is not a 1-to-1 output of the mintty. Remote access started via shell is broken, requires fakecygpty to fix and still has problems sending interrupt signals like C-c
+- Shell in Emacs is not a 1-to-1 output of the mintty. Remote access started via shell is broken, requires fakecygpty to fix it and still has problems sending interrupt signals like C-c
 - Workaround: Start a mintty directly from windows
-- To this date [2017-12-21 Do] powershell can not be used as an emacs shell, see powershell package description
-*** Unused popular Packages
-**** Projectile
-Since I work with org mode and org-links to the project directories, which open up the windows-explorer I have no need for projectile
-**** Dired
-I use the Windows-Explorer, it's integration with windows is obviously seemless for local or remote files.
-**** Tramp
-I rarely need to edit files remotely, if so it's in most cases a one-liner which is done using vi, additional shells on windows are mostly broken and remote access to files is very slow
-** Basic Github Configuration
-(Open Mintty, then)
+- Powershell can not be used as an emacs shell, see powershell package description
+** Basic Git Configuration for Github
+Open Mintty, then enter commands beleow after filing in your personal details
+#+BEGIN_SRC bash
 git config --global user.email "myusername@myemailprovider.com"
 git config --global user.name "My Name"
 git config credential.https://github.com.username githubusername
@@ -801,3 +1003,4 @@ git remote add origin https://github.com/githubusername/yourrepositoryname.git
 git push -u origin master
 Password for 'https://githubusername@github.com':XXXXXXXXXXXX
 git remote -v
+#+END_SRC

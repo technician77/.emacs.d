@@ -1,4 +1,4 @@
-* _Initialization_
+* Initialization
 ** Directory creation if needed
 *** home folder
 #+BEGIN_SRC emacs-lisp
@@ -44,21 +44,22 @@
     (make-directory "~/.emacs.d/undo-tree"))
 #+END_SRC
 ** Use-Package+Bind-Key
-Bind-Key is pulled as a dependency.
 #+BEGIN_SRC emacs-lisp
   (unless (package-installed-p 'use-package)
     (package-refresh-contents)
     (package-install 'use-package))
-  (unless (package-installed-p 'use-package-ensure-system-package)
-    (package-refresh-contents)
-    (package-install 'use-package-ensure-system-package))
   (eval-when-compile
     (require 'use-package))
-  (require 'bind-key)
   (setq use-package-verbose t)
   (setq use-package-always-ensure t)
+  (setq use-package-compute-statistics t)
 #+END_SRC
-* _C-Core_
+** Support-Packages for Use-Packages
+#+BEGIN_SRC emacs-lisp
+  (use-package bind-key)
+  (use-package delight)
+#+END_SRC
+* C-Core
 #+BEGIN_SRC emacs-lisp
   (use-package emacs
     :ensure nil
@@ -78,6 +79,7 @@ Bind-Key is pulled as a dependency.
     ("s-c d" . my-diff-last-two-kills)
     ("s-c ß" . my-toggle-transparency)
     :custom
+    (x-underline-at-descent-line t)
     (temporary-file-directory "~/temp")
     (delete-by-moving-to-trash t)
     (echo-keystrokes 0.02)
@@ -121,10 +123,13 @@ Bind-Key is pulled as a dependency.
     (setq system-time-locale "de_DE.utf8")
     (setq auto-window-vscroll nil)
     (setq left-margin-width 1 right-margin-width 1)
+    (set-fontset-font t 'unicode "Segoe UI Symbol" nil 'prepend)
     (defalias 'yes-or-no-p 'y-or-n-p)
-    (set-fontset-font t 'unicode "Symbola" nil 'prepend))
+    ;; ### Environment ###
+    (setenv "SHELL" shell-file-name) ; If not set you will see "Setting up indent for shell type sh" instead for type bash.
+    (setenv "DICTIONARY" "de_DE")) ; If not set no dictionary will be loaded and flyspell will not work.
 #+END_SRC
-* _Built-in_
+* Built-in
 ** Packages
 Pay attention when configuring :defer t, loading might be required.
 *** Auto-Revert
@@ -260,7 +265,8 @@ Pay attention when configuring :defer t, loading might be required.
   (use-package desktop
     :ensure nil
     :custom
-    (desktop-base-file-name "emacs-desktop.el")
+    (desktop-base-file-name "desktop.el")
+    (desktop-missing-file-warning t)
     :config
     (desktop-save-mode))
 #+END_SRC
@@ -317,8 +323,8 @@ Relative line Numbers cause flickering due to redisplaying
     :ensure nil
     :defer t
     :custom
-    (doc-view-resolution 200)
-    (doc-view-ghostscript-program (symbol-value 'my-relative-ghostscript-program)))
+    (doc-view-ghostscript-program (symbol-value 'my-relative-ghostscript-program))
+    (doc-view-resolution 200))
 #+END_SRC
 *** Ediff
 #+BEGIN_SRC emacs-lisp
@@ -346,16 +352,6 @@ Relative line Numbers cause flickering due to redisplaying
     (ediff-odd-diff-B ((t :background "#b22222")))
     (ediff-odd-diff-C ((t :background "#87ceeb"))))
 #+END_SRC
-*** Env
-#+BEGIN_SRC emacs-lisp
-  (use-package env
-    :ensure nil
-    :config
-    (setenv "LANG" "de_DE.utf8")
-    (setenv "LC_ALL" "de_DE.utf8")
-    (setenv "SHELL" "bash") ; Required for indentation setup bash instead sh
-    (setenv "DICTIONARY" "de_DE"))
-#+END_SRC
 *** Eshell
 EM-Term must be customed or setq this way in order to avoid error, since variable is not available before loading.
 #+BEGIN_SRC emacs-lisp
@@ -374,7 +370,7 @@ EM-Term must be customed or setq this way in order to avoid error, since variabl
   (use-package faces
     :ensure nil
     :custom-face
-    (default ((t :family "Source Code Pro" :background "black" :foreground "white" :foundry "outline" :slant normal :weight normal :height 143 :width normal)))
+    (default ((t :family "Source Code Pro" :background "black" :foreground "white" :foundry "outline" :slant normal :weight normal :height 145 :width normal)))
     (region ((t :background "#2f4f4f")))
     (link ((t :foreground "#98fb98" :underline t)))
     (mode-line ((t :foreground "white" :background "#212526" :box nil :weight extralight)))
@@ -400,8 +396,8 @@ write-file ~= save as
     :custom
     (require-final-newline t)
     (delete-old-versions t)
-    (kept-new-versions 10)
-    (kept-old-versions 0)
+    (kept-new-versions 25)
+    (kept-old-versions 10)
     (version-control t)
     (auto-save-file-name-transforms '(("\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"  "~/.emacs.d/auto-save/" t)))
     (backup-by-copying t)
@@ -483,42 +479,32 @@ write-file ~= save as
 **** Main
 #+BEGIN_SRC emacs-lisp
   (use-package ibuffer
-  :ensure nil
-  :bind
-  (("<f6>" . ibuffer-jump)
-   :map ibuffer-mode-map
-   ("z" . my-ibuffer-open-in-desktop))
-  :custom
-  (ibuffer-expert t)
-  (ibuffer-default-sorting-mode 'alphabetic)
-  ;related to size-h definition beleow
-  (ibuffer-formats
-   '((mark modified read-only " "
-           (name 18 18 :left :elide)
-           " "
-           (size-h 9 -1 :right)
-           " "
-           (mode 16 16 :left :elide)
-           " "
-           filename-and-process)))
-  :config
-  (defun my-ibuffer-open-in-desktop ()
-    "Call `open-in-desktop' on current or marked buffers."
-    (interactive)
-    (if (ibuffer-marked-buffer-names)
-        (ibuffer-do-open-in-desktop)
-      (let ((buf (ibuffer-current-buffer t)))
-        (unless buf
-          (error "No live buffer at point."))
-        (with-current-buffer buf
-          (my-open-in-desktop)))))
-  :hook
-  ;- Switch to saved filter groups when opening default, update list automatically
-  (ibuffer-mode . (lambda () (ibuffer-auto-mode 1) (ibuffer-switch-to-saved-filter-groups "default")))
-  ;- Forces Ibuffer to use other window when pressing o instead of opening a new one
-  (ibuffer-mode . (lambda () (setq-local display-buffer-base-action '(display-buffer-use-some-window)))))
+    :ensure nil
+    :bind
+    (("<f6>" . ibuffer-jump)
+     :map ibuffer-mode-map
+     ("z" . my-ibuffer-open-in-desktop))
+    :custom
+    (ibuffer-expert t)
+    (ibuffer-default-sorting-mode 'alphabetic)
+    ;related to size-h definition below
+    (ibuffer-formats
+     '((mark modified read-only " "
+             (name 18 18 :left :elide)
+             " "
+             (size-h 9 -1 :right)
+             " "
+             (mode 16 16 :left :elide)
+             " "
+             filename-and-process)))
+    :hook
+    ;- Switch to saved filter groups when opening default, update list automatically
+    (ibuffer-mode . (lambda () (ibuffer-auto-mode 1) (ibuffer-switch-to-saved-filter-groups "default")))
+    ;- Forces Ibuffer to use other window when pressing o instead of opening a new one
+    (ibuffer-mode . (lambda () (setq-local display-buffer-base-action '(display-buffer-use-some-window)))))
 #+END_SRC
-**** Define Ibuffer-do-open-in-desktop command and Human-readable size (size-h)
+**** Custom Functions
+***** Define Ibuffer-do-open-in-desktop command and Human-readable size (size-h)
 #+BEGIN_SRC emacs-lisp
   (with-eval-after-load "ibuffer"
     (define-ibuffer-op open-in-desktop ()
@@ -532,6 +518,23 @@ write-file ~= save as
        ((> (buffer-size) 100000) (format "%7.0fk" (/ (buffer-size) 1000.0)))
        ((> (buffer-size) 1000) (format "%7.1fk" (/ (buffer-size) 1000.0)))
        (t (format "%8d" (buffer-size))))))
+#+END_SRC
+***** Ibuffer-open-in-desktop
+#+BEGIN_SRC emacs-lisp
+  (defun my-ibuffer-open-in-desktop ()
+    "Call `open-in-desktop' on current or marked buffers."
+    (interactive)
+    (if (ibuffer-marked-buffer-names)
+        (ibuffer-do-open-in-desktop)
+      (let ((buf (ibuffer-current-buffer t)))
+        (unless buf
+          (error "No live buffer at point."))
+        (with-current-buffer buf
+          (my-open-in-desktop)))))
+  (defun my-open-in-desktop ()
+    "Open the containing directory of current file in Windows explorer"
+    (interactive)
+    (w32-shell-execute "explore" (replace-regexp-in-string "/" "\\" default-directory t t)))
 #+END_SRC
 *** Ibuffer-Extension
 #+BEGIN_SRC emacs-lisp
@@ -553,20 +556,19 @@ write-file ~= save as
 #+END_SRC
 *** Ispell
 #+BEGIN_SRC emacs-lisp
-  (use-package ispell
-    :ensure nil
-    :ensure-system-package ((hunspell . "pacman -S hunspell"))
-    :bind
-    ("s-i c" . ispell-change-dictionary)
-    ("s-i r" . ispell-region)
-    ("s-i w" . ispell-wordd)
-    ("s-i b" . ispell-buffer)
-    :custom
-    (ispell-silently-savep t)
-    (ispell-dictionary "deutsch")
-   ;(ispell-program-name "aspell") ; Uncomment to switch to Aspell
-   ;(ispell-extra-args '("--sug-mode=ultra" "--lang=de_DE")) ; Uncomment to switch to Aspell
-   )
+(use-package ispell
+  :ensure nil
+  :bind
+  ("s-i c" . ispell-change-dictionary)
+  ("s-i r" . ispell-region)
+  ("s-i w" . ispell-wordd)
+  ("s-i b" . ispell-buffer)
+  :custom
+  (ispell-silently-savep t)
+  (ispell-dictionary "deutsch")
+ ;(ispell-program-name "aspell") ; Uncomment to switch to Aspell
+ ;(ispell-extra-args '("--sug-mode=ultra" "--lang=de_DE")) ; Uncomment to switch to Aspell
+ )
 #+END_SRC
 *** Misc
 #+BEGIN_SRC emacs-lisp
@@ -632,6 +634,8 @@ write-file ~= save as
     :ensure nil
     :bind
     ("<f12> u" . package-list-packages)
+    :hook
+    (package-menu-mode . hl-line-mode)
     :custom
     (package-archives
      '(
@@ -736,6 +740,7 @@ write-file ~= save as
    :ensure nil
    :custom
    (savehist-file "~/.emacs.d/history.el")
+   (histcory-length 1000)
    :config
    (savehist-mode))
 #+END_SRC
@@ -789,6 +794,9 @@ write-file ~= save as
     (kill-do-not-save-duplicates t)
     (save-interprogram-paste-before-kill t)
     (yank-pop-change-selection t)
+    (async-shell-command-buffer 'new-buffer)
+    :delight
+    (overwrite-mode " ⎀")
     :config
     (global-visual-line-mode))
     #+END_SRC
@@ -995,7 +1003,7 @@ Used for temp.txt
 #+BEGIN_SRC emacs-lisp
   (defun my-update-locatedb ()
     (interactive)
-    (start-process "updatedb" "*Messages*" "updatedb"))
+    (start-process "updatedb" "*Messages*" "updatedb" (symbol-value 'my-relative-locate-parameter)))
 #+END_SRC
 **** Search-Near
 #+BEGIN_SRC emacs-lisp
@@ -1062,19 +1070,19 @@ Used for temp.txt
       (kill-buffer old)
       (kill-buffer new)))
 #+end_src
-* _Manual_
+* Manual
 ** Initialization
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'load-path "~/.emacs.d/myscripts/")
 #+END_SRC
 ** Fakecygpty
 #+BEGIN_SRC emacs-lisp
-  (use-package fakecygpty
-    :ensure nil
-    :config
-    (fakecygpty-activate))
+(use-package fakecygpty
+  :ensure nil
+  :config
+  (fakecygpty-activate))
 #+END_SRC
-* _External_
+* External
 ** All-the-icons
 *** All-the-icons-dired
 #+BEGIN_SRC emacs-lisp
@@ -1115,7 +1123,7 @@ Also used by swiper. Swiper-Avy
   (use-package celestial-mode-line
     :init
     (add-to-list 'global-mode-string 'celestial-mode-line-string t)
-    (defvar celestial-mode-line-sunrise-sunset-alist '((sunrise . "*↑ ") (sunset . "*↓ ")))
+;    (defvar celestial-mode-line-sunrise-sunset-alist '((sunrise . "*↑ ") (sunset . "*↓ ")))
     :config
     (celestial-mode-line-start-timer))
 #+END_SRC
@@ -1125,6 +1133,7 @@ Also used by swiper. Swiper-Avy
   (use-package company
     :custom
     (company-idle-delay 0.5)
+    (company-tooltip-align-annotations t)
     (company-global-modes '(not eshell-mode comint-mode erc-mode rcirc-mode))
     :hook
     (after-init . global-company-mode))
@@ -1133,7 +1142,7 @@ Also used by swiper. Swiper-Avy
 #+BEGIN_SRC emacs-lisp
   (use-package company-auctex
     :mode ("\\.tex\\'" . TeX-latex-mode)
-    :init
+    :config
     (company-auctex-init))
 #+END_SRC
 *** Company-Bibtex
@@ -1145,6 +1154,7 @@ Also used by swiper. Swiper-Avy
 #+END_SRC
 ** Counsel
 *** Counsel-Mode
+Counsel-locate-cmd-es uses es.exe which requires the Everything GUI-Version to run in the background.
 #+BEGIN_SRC emacs-lisp
   (use-package counsel
     :bind
@@ -1154,6 +1164,8 @@ Also used by swiper. Swiper-Avy
      ("<f1> <SPC>" . counsel-mark-ring)
      ("<f1> <f9>" . counsel-locate)
      ("<f9> c" . counsel-bookmark))
+    :custom
+    (counsel-locate-cmd 'counsel-locate-cmd-es)
     :config
     (counsel-mode))
 #+END_SRC
@@ -1341,8 +1353,8 @@ Pay attention to file-locking in Windows explorer pdf-preview when opening the c
     (TeX-auto-save t)
     (TeX-parse-self t)
     (TeX-save-query nil)
-    (preview-gs-command (symbol-value 'my-relative-ghostscript-program))
     (TeX-master nil)
+    (preview-gs-command (symbol-value 'my-relative-ghostscript-program))
     :config
               (lambda ()
                 (add-to-list 'TeX-command-list
@@ -1361,13 +1373,13 @@ Pay attention to file-locking in Windows explorer pdf-preview when opening the c
     (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)) ; Can't be initialized via :hook since it doesn't end with -hook
 #+End_SRC
 *** Latex-Extra
-The wrapping is needed to avoid "free variable"
+The wrapping is needed to avoid "free variable" when compiling.
 #+BEGIN_SRC emacs-lisp
- (let ((byte-compile-warnings '(not free-vars)))
-  (use-package latex-extra
-    :demand t
-    :hook
-    (LaTeX-mode . latex-extra-mode)))
+  (let ((byte-compile-warnings '(not free-vars)))
+    (use-package latex-extra
+      :mode ("\\.tex\\'" . TeX-latex-mode)
+      :hook
+      (LaTeX-mode . latex-extra-mode)))
 #+END_SRC
 ** Lisp-Butt-Mode
 #+BEGIN_SRC emacs-lisp
@@ -1399,22 +1411,14 @@ As above, but add (P)ush,(p)ush
     :custom
     (magit-auto-revert-mode nil))
 #+END_SRC
+*** Basic
 ** Minions
 #+BEGIN_SRC emacs-lisp
   (use-package minions
     :custom
     (minions-mode-line-lighter "⚙")
     (minions-mode-line-delimiters nil)
-    (minions-direct '(overwrite-mode flycheck-mode projectile-mode))
-    (minions-whitelist '((abbrev-mode . nil)
-                         (auto-fill-mode . nil)
-                         (auto-revert-tail-mode . nil)
-                         (flyspell-mode . nil)
-                         (page-break-lines-mode . nil)
-                         (font-lock-mode . nil)
-                         (display-line-numbers-mode . nil)
-                         (highlight-changes-mode . nil)
-                         (ruler-mode . nil)))
+    (minions-direct '(org-tree-slide-mode overwrite-mode flycheck-mode projectile-mode))
     :config
     (minions-mode))
 #+END_SRC
@@ -1428,58 +1432,61 @@ As above, but add (P)ush,(p)ush
 *** Org-Mode Main-Config
 **** Org
 #+BEGIN_SRC emacs-lisp
-  (use-package org
-    :pin org
-    :bind (
-           ("C-c c" . org-capture)
-           :map org-mode-map
-           ("C-c l" . org-store-link)
-           ("C-c a" . org-agenda)
-           ("C-c u" . outline-up-heading)
-           ("C-c p" . org-toggle-inline-images)
-           ("C-c r" . org-sort)
-           ("C-c i" . org-tree-to-indirect-buffer)
-           ("C-c s" . org-cut-special)
-           ("C-c O" . org-occur)
-           ("C-c d" . my-org-cycle-previous-heading)
-           ("C-c D" . my-org-cycle-up-heading)
-           ("C-c t" . my-org-timestamper)
-           ("s-p" . org-previous-visible-heading)
-           ("<s-tab>" . org-cycle-list-bullet)
-           ("C-n"   . org-toggle-narrow-to-subtree)
-           ("s-n" . org-next-visible-heading))
-    :custom
-    (org-outline-path-complete-in-steps nil)
-    (org-catch-invisible-edits 'error)
-    (org-default-notes-file "~/org/notes.org")
-    (org-ditaa-jar-path (concat my-relative-directory-org-ditaa-jar-path "ditaa0_11.jar"))
-    (org-ellipsis "↴")
-    (org-hide-emphasis-markers t)
-    (org-highlight-latex-and-related '(native script entities))
-    (org-babel-load-languages '((ditaa . t) (gnuplot . t) (latex . t) (emacs-lisp . t) (C . t)))
-    (org-special-ctrl-a/e t)
-    (org-startup-indented t)
-    (org-startup-truncated nil)
-    (org-tags-column -1)
-    (org-todo-keywords
-     '((sequence "ZU-ERLEDIGEN" "IN-ARBEIT" "UNTERBROCHEN" "|" "ERLEDIGT" "STORNIERT")
-       (sequence "WARTEN-RÜCKM-KUNDE" "WARTEN-RÜCKM-INTERN" "WARTEN-WARE" "|")))
-    (org-tag-alist '(("important" . ?i)
-                     ("urgent"    . ?u)))
-    (org-use-property-inheritance t)
-    (org-yank-adjusted-subtrees t)
-    :custom-face
-    (org-code ((nil :inherit 'org-habit-alert-face)))
-    (org-verbatim ((nil :inherit 'org-habit-overdue-face)))
-    :hook
-    (org-agenda-finalize . org-agenda-to-appt))
-    #+END_SRC
+(use-package org
+  :pin org
+  :bind (
+         ("C-c c" . org-capture)
+         :map org-mode-map
+         ("C-c l" . org-store-link)
+         ("C-c a" . org-agenda)
+         ("C-c u" . outline-up-heading)
+         ("C-c p" . org-toggle-inline-images)
+         ("C-c r" . org-sort)
+         ("C-c i" . org-tree-to-indirect-buffer)
+         ("C-c s" . org-cut-special)
+         ("C-c O" . org-occur)
+         ("C-c d" . my-org-cycle-previous-heading)
+         ("C-c D" . my-org-cycle-up-heading)
+         ("C-c t" . my-org-timestamper)
+         ("s-p" . org-previous-visible-heading)
+         ("<s-tab>" . org-cycle-list-bullet)
+         ("C-n"   . org-toggle-narrow-to-subtree)
+         ("s-n" . org-next-visible-heading))
+  :custom
+  (org-export-backends '(ascii beamer html latex md odt))
+  (org-outline-path-complete-in-steps nil)
+  (org-catch-invisible-edits 'error)
+  (org-default-notes-file "~/org/notes.org")
+  (org-ditaa-jar-path (concat my-relative-directory-org-ditaa-jar-path "ditaa0_11.jar"))
+  (org-ellipsis "…")
+  (org-hide-emphasis-markers t)
+  (org-highlight-latex-and-related '(native script entities))
+  (org-babel-load-languages '((ditaa . t) (gnuplot . t) (latex . t) (emacs-lisp . t) (C . t) (dot . t)))
+  (org-special-ctrl-a/e t)
+  (org-startup-indented t)
+  (org-startup-truncated nil)
+  (org-tags-column -1)
+  (org-todo-keywords
+   '((sequence "ZU-ERLEDIGEN" "IN-ARBEIT" "UNTERBROCHEN" "|" "ERLEDIGT" "STORNIERT")
+     (sequence "WARTEN-RÜCKM-KUNDE" "WARTEN-RÜCKM-INTERN" "WARTEN-WARE" "|")))
+  (org-tag-alist '(("important" . ?i)
+                   ("urgent"    . ?u)))
+  (org-use-property-inheritance t)
+  (org-yank-adjusted-subtrees t)
+  (org-refile-targets (quote (("notes.org" :maxlevel . 5))))
+  :custom-face
+  (org-code ((nil :inherit 'org-habit-alert-face)))
+  (org-verbatim ((nil :inherit 'org-habit-overdue-face)))
+  :hook
+  (org-agenda-finalize . org-agenda-to-appt))
+#+END_SRC
 **** Org-Agenda
  #+BEGIN_SRC emacs-lisp
    (use-package org-agenda
      :ensure nil
      :defer t
      :custom
+     (org-agenda-skip-scheduled-if-deadline-is-shown t)
      (org-agenda-start-with-clockreport-mode t)
      (org-agenda-start-with-log-mode t)
      (org-agenda-hide-tags-regexp ".*")
@@ -1511,10 +1518,6 @@ As above, but add (P)ush,(p)ush
          "* ERLEDIGT %? \n:PROPERTIES:\n:Abgemeldet: Nein\n:Leistungsart:\n:END:\nCLOCK: %U--%U\n%i\n%a")
         ("n" "Notiz" entry (file+headline "~/org/notes.org" "Notizen unsortiert")
          "* %?")
-        ("p" "Protocol" entry (file+headline "~/org/notes.org" "Notizen unsortiert")
-         "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
-        ("L" "Protocol Link" entry (file+headline "~/org/notes.org" "Notizen unsortiert")
-         "* %? [[%:link][%:description]] \nCaptured On: %U")
         )))
   #+END_SRC
 **** Org-Clock
@@ -1574,6 +1577,7 @@ As above, but add (P)ush,(p)ush
      :ensure nil
      :defer t
      :custom
+     (org-edit-src-content-indentation 2)
      (org-src-tab-acts-natively t))
   #+END_SRC
 *** Org-Bookmark-heading
@@ -1659,17 +1663,7 @@ Collapse subtee above current heading
       (insert " ")
       (org-insert-time-stamp nil t t)))
 #+END_SRC
-*** Org-Sticky-Header
-#+BEGIN_SRC emacs-lisp
-(use-package org-sticky-header
-  :hook
-  (org-mode . org-sticky-header-mode)
-  :custom 
-  (org-sticky-header-full-path 'full)
-  (org-sticky-header-prefix "📌: ")
-  (org-sticky-header-outline-path-separator " > "))
-#+END_SRC
-*** Org-Contrib
+*** Org-Habit
 **** Org-Habit
 Org-Habit-Colours are used in emphasis.
 #+BEGIN_SRC emacs-lisp
@@ -1704,6 +1698,8 @@ When Path to EPDFInfo.exe is in PATH, therefore known by emacs. The Skript will 
     (pdf-view-mode . (lambda() (blink-cursor-mode -1)))
     :custom
     (pdf-view-display-size 'fit-page)
+    (pdf-annot-activate-created-annotations t)
+    (pdf-view-midnight-colors '("#ffffff" . "#000000"))
     :config
     (pdf-tools-install :no-query))
 #+END_SRC
@@ -1711,19 +1707,25 @@ When Path to EPDFInfo.exe is in PATH, therefore known by emacs. The Skript will 
 *** Precient-Core
 #+BEGIN_SRC emacs-lisp
   (use-package prescient
+   :custom
+   (prescient-save-file "~/.emacs.d/prescient-save.el")
    :config
    (prescient-persist-mode))
 #+END_SRC
 *** Ivy-Prescient Backend
 #+BEGIN_SRC emacs-lisp
   (use-package ivy-prescient
-   :after counsel
+   :after (prescient ivy)
+   :custom
+   (ivy-prescient-enable-filtering t)
+   (ivy-prescient-enable-sorting t)
    :config
    (ivy-prescient-mode))
 #+END_SRC
 *** Company-Prescient Backend
 #+BEGIN_SRC emacs-lisp
   (use-package company-prescient
+   :after (precient company)
    :config
    (company-prescient-mode))
 #+END_SRC
@@ -1757,20 +1759,12 @@ Copy this in source for testing: ((((((((()))))))))
     :bind
     ("<f11> l" . register-list))
 #+END_SRC
-** RipGrep/WGrep
-*** RG
+** Rip-Grep
+Can use WGrep, turn off evil when switching to it.
 #+BEGIN_SRC emacs-lisp
   (use-package rg
     :bind
     ("s-R" . rg-menu))
-#+END_SRC
-*** WGrep
-#+BEGIN_SRC emacs-lisp
-  (use-package wgrep
-    :hook
-    (rg-mode . wgrep-rg-setup)
-    :config
-    (autoload 'wgrep-rg-setup "wgrep-rg"))
 #+END_SRC
 ** Synosaurus
 #+BEGIN_SRC emacs-lisp
@@ -1811,6 +1805,7 @@ To select buffers in Swiper-Multi use C-M-m to select buffers.
      (:map swiper-map
            ("C-#"   . swiper-avy)))
     :custom
+    (swiper-goto-start-of-match t)
     (swiper-action-recenter t))
 #+END_SRC
 ** Temporary-Persistent
@@ -1885,6 +1880,16 @@ undo-tree-auto-save-history is nil otherwise desktop-read might fail and therfor
     :config
     (add-to-list 'company-backends #'company-yankpad))
 #+END_SRC
+** WGrep
+#+BEGIN_SRC emacs-lisp
+  (use-package wgrep
+    :hook
+    (rg-mode . wgrep-rg-setup)
+    :custom
+    (wgrep-change-readonly-file t)
+    :config
+    (autoload 'wgrep-rg-setup "wgrep-rg"))
+#+END_SRC
 ** Which-Key
 #+BEGIN_SRC emacs-lisp
   (use-package which-key
@@ -1917,3 +1922,4 @@ undo-tree-auto-save-history is nil otherwise desktop-read might fail and therfor
     (add-to-list 'which-key-replacement-alist '(("insert"    . nil) . ("⎀" . nil)))
     (which-key-mode))
 #+END_SRC
+* Test

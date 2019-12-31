@@ -1,13 +1,5 @@
 * Current
 ** Custom Fuctions
-*** Open in Desktop
-#+BEGIN_SRC emacs-lisp
-  (defun my-open-in-desktop ()
-    "Open the containing directory of current file in Windows explorer"
-    (interactive)
-    (w32-shell-execute "explore" (replace-regexp-in-string "/" "\\" default-directory t t)))
-    (bind-key "H-o" 'my-open-in-desktop)
-#+END_SRC
 *** DOS EOL-Removal
 #+BEGIN_SRC emacs-lisp
   (defun my-dos-eol-removal ()
@@ -82,6 +74,10 @@ Use profiler to find slowdowns.
 (Incompatible with org-mode source code blocks)
 #+BEGIN_SRC emacs-lisp
   (use-package annotate)
+#+END_SRC
+**** Apache-Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package apache-mode)
 #+END_SRC
 **** Auto-Update
 #+BEGIN_SRC emacs-lisp
@@ -419,6 +415,10 @@ Evaluate risk on SMB-Drives before using it.
 #+BEGIN_SRC emacs-lisp
   (use-package filetags)
 #+END_SRC
+**** Fireplace
+#+BEGIN_SRC emacs-lisp
+  (use-package fireplace)
+#+END_SRC
 **** Flycheck
 #+BEGIN_SRC emacs-lisp
   (use-package flycheck
@@ -456,11 +456,12 @@ Evaluate risk on SMB-Drives before using it.
 #+END_SRC
 **** Gnuplot
 Required for org-babel to display gnuplot graphics.
-As of now, Version 20141231.2137 requires a manual fix on windows:
+As of now, Version gnuplot-20191212.1801 requires a manual fix on windows:
 In (defun gnuplot-send-string-to-gnuplot (string text)
 ...
 replace (comint-send-input) by (comint-send-input nil 1)
 then byte-compile-file gnuplot.el
+NOT APPLYING THE FIX WILL RESULT EMACS TO FREEZE WHEN PLOTTING!
 #+BEGIN_SRC emacs-lisp
   (use-package gnuplot) 
 #+END_SRC
@@ -736,9 +737,28 @@ Requires unzip
     nov-text-width 80)
 #+END_SRC
 **** Org
+***** Org-Sticky-Header
+#+BEGIN_SRC emacs-lisp
+(use-package org-sticky-header
+  :hook
+  (org-mode . org-sticky-header-mode)
+  :custom 
+  (org-sticky-header-full-path 'full)
+  (org-sticky-header-prefix "📌: ")
+  (org-sticky-header-outline-path-separator " > "))
+#+END_SRC
+***** Org-Bullets
+#+BEGIN_SRC emacs-lisp
+  (use-package org-bullets)
+#+END_SRC
 ***** Org-Babel-Browser
 #+BEGIN_SRC emacs-lisp
  (use-package ob-browser)
+#+END_SRC
+***** Org-Export-Groff
+#+BEGIN_SRC emacs-lisp
+  (use-package ox-groff
+   :ensure org-plus-contrib)
 #+END_SRC
 ***** Org-MRU-Clock
 #+BEGIN_SRC emacs-lisp
@@ -775,11 +795,6 @@ Requires unzip
 #+BEGIN_SRC emacs-lisp
   (use-package org-kanban)
 #+END_SRC
-***** Org-Mind-Map
-#+BEGIN_SRC emacs-lisp
-  (use-package org-mind-map
-    :requires ox-org)
-#+END_SRC
 ***** Org-Outlook
 setx OUTLOOK4E C:\PROGRA~2\MICROS~1\root\Office16
 #+BEGIN_SRC emacs-lisp
@@ -788,6 +803,18 @@ setx OUTLOOK4E C:\PROGRA~2\MICROS~1\root\Office16
 ***** Org-Protocol
 #+BEGIN_SRC emacs-lisp
   (use-package org-protocol
+     :custom
+     (org-capture-templates
+      '(("a" "Aufgabe" entry (file+headline "~/org/notes.org" "Aufgaben ohne Zuordnung")
+         "* ZU-ERLEDIGEN %?\n  %i\n  %a")
+        ("j" "Journal" entry (file+olp+datetree "~/org/journal.org")
+         "* ERLEDIGT %? \n:PROPERTIES:\n:Abgemeldet: Nein\n:Leistungsart:\n:END:\nCLOCK: %U--%U\n%i\n%a")
+        ("n" "Notiz" entry (file+headline "~/org/notes.org" "Notizen unsortiert")
+         "* %?")
+        ("p" "Protocol" entry (file+headline "~/org/notes.org" "Notizen unsortiert")
+         "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
+        ("L" "Protocol Link" entry (file+headline "~/org/notes.org" "Notizen unsortiert")
+         "* %? [[%:link][%:description]] \nCaptured On: %U")))
     :ensure nil)
 #+END_SRC
 ***** Org-Ref
@@ -857,6 +884,17 @@ Needs further configuration!
     :commands
     (org-pomodoro))
 #+END_SRC
+***** Org-Tree-Slides
+#+BEGIN_SRC emacs-lisp
+(use-package org-tree-slide
+  :custom
+  (org-tree-slide-breadcrumbs nil)
+  (org-tree-slide-header nil)
+  (org-tree-slide-slide-in-effect nil)
+  (org-tree-slide-cursor-init nil)
+  (org-tree-slide-modeline-display nil)
+  (org-tree-slide-never-touch-face nil))
+#+END_SRC
 ***** Org-Web-Tools
 #+BEGIN_SRC emacs-lisp
 (use-package org-web-tools)
@@ -887,6 +925,13 @@ Needs further configuration!
            (kill-new it)
            (message "Copied \"%s\"." it)))
   (define-key org-mode-map (kbd "C-c m") #'ph/org-extract-link)
+#+END_SRC
+***** Org-Mind-Map
+#+BEGIN_SRC emacs-lisp
+  (use-package ox-org
+   :ensure nil)
+  (use-package org-mind-map
+    :requires ox-org)
 #+END_SRC
 **** Outshine
 #+BEGIN_SRC emacs-lisp
@@ -1114,13 +1159,4 @@ run tldr-update-docs before first run, wait for the download/decompression
     :commands company-lsp
     :config
     (add-to-list 'company-backends 'company-lsp))
-#+END_SRC
-*** Pippel
-(Not working yet, needs more testing, probably incompatible with Windows)
-#+BEGIN_SRC emacs-lisp
-  (use-package pippel
-  :commands
-  (pippel-list-packages pippel-install-package)
-  :custom
-  (pippel-python-command "python3"))
 #+END_SRC
