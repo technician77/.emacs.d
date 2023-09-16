@@ -1,0 +1,1098 @@
+* Preface
+- I'm not a coder. Therefore the configuration is not geared towards that.
+- I'm on windows and on a slow pc. Therefore packages that are not working fast on windows (i.e. because they use extensive process-forking, which is non-existent on windows) are not used no matter how useful they might be. Also some packages do not work properly because they use (on windows) not properly implemented back-ends, like terminals and shells.
+- I have a certain, limited, workflow, that involves the use of windows specific apps, like windows-explorer. Because of that and things mentioned above some packages, like projectile, although very useful by themselves, have no use for me.
+- I try to be use packages that fit within the basic Emacs concepts. Although Emacs can be bend beyond recognition does not mean I like that. So packages like helm and evil are not for me. I have installed evil, but this is just for training purposes since you can't escape vim completely.
+- A word on Spacemacs/Prelude and similar Emacs distributions. First especially Spacemacs is geared towards vi users and programmers. Currently I don't want both. All preconfigured Emacs distributions contain a lot of stuff I don't need or want. First, this extra bloat causes unnecessary slowdown. The second problem is that every package in Emacs can fail or misbehave. This accumulates with the number of packages. Therefore IMHO the best option is to have a slim Emacs only with packages that you need or at least understand their use. There might be users who can harness the advantages of these preconfigured Emacs distributions and can live/deal with the problems that might occur, but I don't. Conclusion: Only use the preconfigured Emacs distributions if you know what your dealing with.
+- My configuration is always WIP, so some inconsistencies might occur. Some problems I describe might be non-existent when you read it since all packages and programs are improved over time.
+* Installation Instructions
+** Installation
+*** Emacs
+**** Purpose and General-Information
+Editor itself
+**** Download and Installation
+https://ftp.gnu.org/pub/gnu/emacs/windows/emacs-XX/emacs-XX.X-x86_64.zip
+- Extract Emacs to dir, then the deps also into it.
+- Run /bin/addpm.exe as Adminstrator. Click yes.
+*** MSYS2
+**** Purpose and General-Information
+Offers Posix-Terminal, shell, cli package-manager and a a large number of packages
+**** Package Handling
+- To install a package invoke pacman -S PACKAGENAME-OR-PACKAGEGROUP
+- Remove a package and unneeded dependencies invoke pacman -Rs PACKAGENAME-OR-PACKAGEGROUP
+- Updates of all installed packages can be done by manually invoking "pacman -Syuu"
+- pacman -Q --info PACKAGENAME or pacman -Qg PACKAGEGROUP gives you information
+**** Download and Installation
+http://www.msys2.org/
+- Download latest msys2-x86_64-XXXXXXXX.exe
+- Default Installation then open a mintty terminal and execute "pacman -Syuu" directly after installation.
+- The step above might be repeated if mintty and/or pacman get updated. If they are the terminal might be needed to be closed and reopened before the command is repeated. You will get a message in the terminal if this needs to be done.
+- If it needs to be done kill the terminal, NOT by executing "exit" rather than by pressing the X button on the window
+- Add pathes to user-PATH variable as instructed in config-specific-XXXX.org
+- Reboot after all packages were installed, this should make sure all environment variables get activated
+- Execute "updatedb" for the locate program to work correctly add a windows task to the scheduler that this is done daily containing C:\msys2\bin\mintty.exe -e 'updatedb --localpaths='//c/'
+- You can check with "locale" command the locale environment variables and with env the other variables
+- Copy configuration file templates to the home folder. They are located in /etc/skel
+- Execute "ssh-keygen" in a terminal. This sets up basic ssh configuration and creates folders and files for ssh.
+- ~To inherit Window PATH(s) in terminals uncomment in C:/msys64/ucrt64.ini the line "MSYS2_PATH_TYPE=inherit"~
+- Launch UCRT64 for the most modern terminal.
+***** .bashrc
+Add variables below to .bashrc file inside your home directory. Use the touch command to generate the file.
+#+BEGIN_SRC shell
+  #
+  # Set Language
+  export LANG=de_DE.UTF-8
+  export LC_ALL=de_DE.UTF-8
+  #
+  # Set Prompt
+  PS1="\[\e[32m\]\u@\h \[\e[33m\]\w\[\e[0m\]\n\$"
+  #
+  # Avoid duplicates in history
+  export HISTCONTROL=ignoredups:erasedups
+  #
+  # VIM Alias
+  alias vi=vim
+  alias ll='ls -l --color'
+  alias h=history
+#+END_SRC
+***** Adding your windows user to Msys2 and setting home, which also sets the HOME variable based on the user
+****** Execute following commands in mintty terminal
+mkgroup > /etc/group
+mkpasswd -cl > /etc/passwd
+****** Check
+Open /etc/passwd check that you username was added
+****** Set absolute Msys2 path and change default shell
+edit /etc/passwd file and change /bash to /fish or /zsh if you are using different shells
+***** Add string below to (HOME-Directory)\.ssh\config in order to avoid problems when using a local proxying application which connects to different hosts using localhost
+Host 127.0.0.*
+   StrictHostKeyChecking no
+   UserKnownHostsFile=/dev/null
+**** Packages to install
+- Msys2 Ghostscript does not seem to be able to show a printing dialog after postscript printing, therefore use native version instead
+- Msys2 Emacs version has better integration in unix tools provided by Msys2 but multiple other things break, therfore not recommeded
+***** Basic Packages required by packages for spellchecking, compiling, imageview, pdf, encryption, compress etc.
+****** base-devel
+Group for development tools
+****** automake
+Make File handling
+****** autoconf
+Autoconf is an extensible package of M4 macros that produce shell scripts to automatically configure software source code packages.
+****** git
+The best version control system
+****** python
+Programming language
+****** compression
+Group for compression tools
+****** mingw-w64-x86_64-hunspell
+Most current spellchecker available
+- Hunspell requires the setting of the DICPATH environment variable in Windows, otherwise dictionaries won't be found by emacs. See config-specific-XXXX.org
+- Install mingw-w64-x86_64-hunspell-en
+- huspell-de is missing. Download the latest dict from libre-office extensions repository https://extensions.libreoffice.org/extensions/german-de-de-frami-dictionaries and install the .dic and .aff files into C:\msys64\mingw64\share\myspell\dicts
+- huspell-fr is missing. Download the latest dict from libre-office extensions repository https://extensions.libreoffice.org/extensions/dictionnaires-francais/5.7 and installed the .dic and .aff files into C:\msys64\mingw64\share\myspell\dicts
+****** mingw-w64-x86_64-toochain
+Installs complete toolchain for 64bit compiling used by Emacs
+****** mingw-w64-x86_64-imagemagick
+Allows Blimp to work
+****** mingw-w64-x86_64-openssl
+The Open Source toolkit for Secure Sockets Layer and Transport Layer Security (mingw-w64)
+****** mingw-w64-x86_64-zlib
+Mini zip and unzip based on zlib 
+****** mingw-w64-x86_64-libpng
+A collection of routines used to create PNG format graphics
+****** mingw-w64-x86_64-poppler
+PDF rendering library based on xpdf 3.0
+***** Additional Packages/Groups to install
+****** bash-completion
+Bash Completion
+****** ca-certificates
+Required for ssl operations
+****** curl
+Dowload anything from the web
+****** fish
+Oh-my-fish
+https://github.com/oh-my-fish/oh-my-fish
+Download Oh-my-fish via curl using the script below
+curl -L https://get.oh-my.fish | fish
+Edit /etc/fish/fish.conf in the same way as .bashrc mentioned above
+****** fzy
+Fuzzy searching
+****** gnu-netcat
+nc command to test connections
+****** info
+Utilities to work with and produce manuals, ASCII text, and on-line documentation from a single source file
+****** iperf3
+Check network performance
+****** less
+A terminal based program for viewing text files
+****** mingw-w64-x86_64-gnuplot
+Ability to create graphs from data as file or directly to display.
+****** mingw-w64-x86_64-graphviz
+Required for org-mind-map and dot language code
+****** net-utils
+Group that contains tools like openssh, rsync and mutt
+****** pwgen
+Password generator
+****** tree
+A directory listing program displaying a depth indented list of files
+****** mingw-w64-x86_64-tree-sitter
+Treesitter Syntax Highlighting for different languages
+****** mingw-w64-x86_64-emacs-pdf-tools-server
+PDF-Tools-Server, a compilation from source is not necessecary anymore
+****** tzcode
+Sources for time zone and daylight saving time data
+****** util-linux
+Collection of basic system utilities
+****** whois
+Whois Client
+****** winpty
+Fixes PTY
+***** Optional
+****** mingw-w64-x86_64-go
+Go Programming Language
+****** mingw-w64-x86_64-tidy
+Cleanup html code
+****** mingw-w64-x86_64-luarocks
+Lua interpreter and luarocks package manager
+****** mingw-w64-x86_64-lua-lpeg
+Pattern-matching library for Lua required for digestif
+****** Python pip
+Python package installer
+******* List installed packaes
+pip list
+******* Install/Uninstall a package
+pip install PACKAGENAME
+pip uninstall PACKAGENAME
+******* List outdated packages
+pip list --outdated
+******* Upgrade packages
+pip install --upgrade PACKAGENAME
+******* Recommended Packages
+- td-watson (call using "watson" command)
+- python-language-server
+- jedi
+- pylint
+- pyflake
+****** rebase
+Contains rebase, rebaseall, peflags, and peflagsall
+****** sys-utils
+Contains System-Tools like heimdal for Kerberos and Wherever Change Directory
+****** tmux
+Terminal Multiplexing
+******* Start mintty using this command
+C:\msys64\usr\bin\mintty.exe -e '%HOME%\start-tmux.sh' -
+******* start-tmux.sh
+#!/bin/fish
+tmux
+******* .tmux.conf (Save file in Unix-Format, otherwise CRLF might not be interpreted correcty)
+#+BEGIN_SRC shell
+# Window-Switching without prefix
+bind-key -n S-Left previous-window
+bind-key -n S-Right next-window
+
+# Pane-Switching without prefix
+bind -n M-Left select-pane -L
+bind -n M-Right select-pane -R
+bind -n M-Up select-pane -U
+bind -n M-Down select-pane -D
+
+# Activate mouse (Causes font resize using C+mouse-wheel to stop working, CS+mouse-wheel still works)
+set -g mouse on
+
+# Show information in title-bar
+set -g set-titles on
+
+# Set Terminal to use 256 colors
+set -g default-terminal "screen-256color"
+
+# Statusbar/window configuration
+set -g status-interval 1
+set -g status-fg white
+set -g status-bg colour240
+set -g status-justify centre
+set -g status-left '#[fg=green][#[fg=red]#S#[fg=green]]#[default]'
+set -g status-right '#[fg=green][#[fg=colour214]%d.%m.%y %H:%M:%S#[fg=green]]#[default]'
+setw -g window-status-current-format '#[fg=green](#[fg=yellow]#I.#P#F#W#[fg=green])#[default]'
+setw -g window-status-format '#I#F#W'
+
+# Install TPM using git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
+# List of plugins
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+
+# Install cygutils-extra for tmux-yank
+set -g @plugin 'tmux-plugins/tmux-yank'
+
+# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+run -b '~/.tmux/plugins/tpm/tpm
+#+END_SRC
+****** vim
+- Test vim commands locally if needed
+- Vim needs to be called by executing "vim" not "vi" if no alias is defined
+****** zsh
+Oh-my-zsh
+https://github.com/ohmyzsh/ohmyzsh
+Download Oh-my-zsh via curl using the script below
+#+BEGIN_SRC bash
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+#+END_SRC
+**** GPG
+Generate Key using "gpg --gen-key" command.
+*** Misc Support Tools
+**** Dig
+***** Purpose and General-Information
+Modern DNS-Query Tool
+***** Download and Installation
+https://downloads.isc.org/isc/bind9/9.15.7/BIND9.15.7.x64.zip
+**** Ditaa
+***** Purpose and General-Information
+Diagramm Creator from Text
+***** Download and Installation
+https://github.com/stathissideris/ditaa
+- Download and unzip latest version to a folder
+- Set Path in specific.org
+- This app requires JRE installed
+**** Fakecygpty
+***** Purpose and General-Information
+Fixes shell problems in emacs when shell is based on MSYS2 mintty
+***** Download and Installation
+https://github.com/d5884/fakecygpty
+- Compile using the command autoreconf -ivf && ./configure && make install
+- copy fakecygpty.el into ~/.emacs.d/myscripts/
+- evaluate (fakecygpty-activate) via use-package
+**** Ghostscript
+***** Purpose and General-Information
+- Postscript suite required to enable postscipt processing for printing produced by emacs and it's packages.
+- Can produce pdfs from postscript
+***** Download and Installation
+- https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/
+- Download gsXXXw64.exe
+- Install in C:/Program Files/gs/ not C:/Program Files/gs/gsXX.XX/ This avoids reconfiguration after update
+**** Miktex
+***** Purpose and General-Information
+Tex-Environment required in order to process latex produced by org mode and other packages.
+***** Download and Installation
+http://miktex.org/download
+- Download basic-miktex-X.X.XXXX-x64.exe
+- Select "Install missing packages on the fly" during installation
+- Export an org file once as pdf in order to download the additional needed files  C-c C-e l o
+**** Notpad++
+***** Purpose and General-Information
+This might look strange, but in case of an emergency, i.e. Emacs is not starting up, this editor might save the day.
+***** Download and Installation
+https://notepad-plus-plus.org/
+**** Pandoc
+***** Purpose and General-Information
+Powerful Document Converter
+***** Download and Installation
+https://github.com/jgm/pandoc/releases/
+- Download and install pandoc-X.XX.X-windows.msi
+**** Reveal.js
+***** Purpose and General-Information
+For visually pleasant presentation export
+***** Download and installation
+https://github.com/hakimel/reveal.js/releases
+- Extract Source to folder named "reveal.js" Put the "reveal.js" folder in the same folder as the presentation.org
+- Execute M-x org-reveal-export-to-html to export to html, open manually in Browser
+**** Ripgrep
+***** Purpose and General-Information
+Fast search through files
+***** Download and Installation
+https://github.com/BurntSushi/ripgrep/releases
+- Download and unzip latest version to a folder
+- Add folder path to PATH variable
+**** Sharp-Keys
+***** Purpose and General-Information
+This app should be used to remap buttons on the OS-Level. Configuations depends on the keyboard used. I recommend:
+- Capslock to Apps (Menu-Key)
+***** Download and Installation
+https://github.com/randyrants/sharpkeys
+**** Source-Code-Pro-Font
+***** Purpose and General-Information
+Better readable default font
+***** Download and installation !Check if otf-cff2 is now supported!
+https://github.com/adobe-fonts/source-code-pro/releases/
+- Download latest ttf Version of the font, otf-cff2 version currently does not work on Windows
+- Extract and install in C:\Windows\Fonts
+**** WinCompose
+***** Purpose and General-Information
+This app uses AltGr as a compose key. The compose key allows access to various symbols using a key combination.
+***** Download and installation
+https://github.com/samhocevar/wincompose
+** Windows Registration
+Save as .reg files and execute once
+*** General
+**** Register-Emacs-Client.reg
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\*\shell\openWithEmacs]
+@="&Edit with Emacs"
+"icon"=%EMACS%\\bin\\Emacsclientw.exe"
+
+[HKEY_CLASSES_ROOT\*\shell\openWithEmacs\command]
+@="\"%EMACS%\\bin\\emacsclientw.exe\" -a \"\" -n \"%L\""
+**** Register-Emacs-file-type.reg
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\EmacsFile]
+@="EmacsFile"
+
+[HKEY_CLASSES_ROOT\EmacsFile\DefaultIcon]
+@="%EMACS%\\bin\\emacsclientw.exe,0"
+
+[HKEY_CLASSES_ROOT\EmacsFile\shell\open]
+@="Open in Emacs"
+
+[HKEY_CLASSES_ROOT\EmacsFile\shell\open\command]
+@="\"%EMACS%\\bin\\emacsclientw.exe\" -a \"\" -n \"%L\""
+**** Register-extensions-to-emacs.reg
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\.el]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.org]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.properties]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.diff]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.cfg]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.cpp]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.css]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.conf]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.log]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.sh]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.ses]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.txt]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.md]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.sgm]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.key]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.pem]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.csr]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.req]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.data]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+*** Outlook
+***** Register-the-Outlook-URL-Handler.reg
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\outlook]
+@="URL:Outlook Folders"
+"URL Protocol"=""
+
+[HKEY_CLASSES_ROOT\outlook\DefaultIcon]
+@="%OUTLOOK4E%\\OUTLOOK.EXE"
+
+[HKEY_CLASSES_ROOT\outlook\shell]
+
+[HKEY_CLASSES_ROOT\outlook\shell\open]
+
+[HKEY_CLASSES_ROOT\outlook\shell\open\command]
+@="\"%OUTLOOK4E%\\OUTLOOK.EXE\" /select \"%1\""
+***** Org Protocol
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\org-protocol]
+@="URL:Org Protocol"
+"URL Protocol"=""
+[HKEY_CLASSES_ROOT\org-protocol\shell]
+[HKEY_CLASSES_ROOT\org-protocol\shell\open]
+[HKEY_CLASSES_ROOT\org-protocol\shell\open\command]
+@="\""%EMACS%\\bin\\emacsclientw.exe\" \"%1\""
+***** Use-Google-Maps-in-Outlook-Contacts.reg
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\Microsoft\Office\16.0\Outlook\Options\General]
+"MapScriptURL"="http://maps.google.com/?q=<0s>, <1s>, <2s>, <3s>, <4s>"
+*** Fix-RDP-Cursorblink
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server]
+"CursorBlinkEnable"=dword:00000001
+** Windows Shortcuts
+*** Client - not waiting for server, opening frame and starting as daemon if not yet done
+emacsclientw.exe -n -c -a ""
+*** Full Application in Debugging Mode
+runemacs.exe -debug-init
+*** Client - not waiting for server, opening frame and starting as daemon if not yet done, switching to temp buffer and adding a dated entry
+emacsclientw.exe -n -c -a ""  -e "(my-timestamper-for-temp)" -F "((fullscreen . maximized))"
+** Emacs-Dot-Files
+*** init.el (Main-Loader)
+- Contains only the necessecary information to load files below.
+- Place in ~\.emacs.d\
+*** custom.el (Emacs custom-system writes here)
+- Must contains only installed package information. Custom Parameters set by use-package get sometimes written here, but can be deleted (except the package information)
+- Place in ~\.emacs.d\
+*** config-general.org
+- Main configuration-file from which config-general.el is generated automatically by org-babel and then loaded by init.el
+- Put config-general.org file in ~\org\ (Create neccessary folders)
+*** config-specific-XXXX.org
+- Additional configuration file from which config-specific-XXXX.el is generated automatically by org-babel and then loaded by init.el
+- Put specific.org file also in ~\org\
+- Edit to your needs, since it contains installations-specific configuration parts
+** Other Instructions
+*** Disable Virtual Desktop Switch Animation
+Open %windir%\system32\SystemPropertiesPerformance.exe and disable "Animate windows when mini...", this also disables the Switch virtual Desktop animation
+*** Input Keycords containing AltGR
+To input keycords combinations first press AltGR then RIGHT-Control (and or Alt), then the letter. Some combinations will not work even when done so.
+*** Modifier
+The Apps key gives you a full modifier, meaning it won't repeat itself when pressed. It works like control/shift/alt. Same goes with LWindows or RWindows. Be aware that some combinations can't be registered by Emacs, they are permanently bound to the Windows OS, like Windows+L, which locks the PC.
+*** Seemingly corrupted org files
+If org files look that is something missing, mostly after loading, just fold and unfold at top level
+*** Desktop not loading
+If desktop is not loaded check ~/.emacs.d/ for .emacs.desktop.lock file and delete it (when emacs is not running)
+*** Ownership of home directory
+Be sure your user is direct owner of the home directory and all subfiles/subdirectories. Otherwise the client may not start.
+** Known issues/broken stuff
+*** Terminals 
+- Mostly broken, the implementation of terminals in emacs is geared towards a POSIX system and not towards windows. Don't waste your time. A reimplementation is not in sight.
+- Workaround: Use standard putty or kitty, for file transfer use win-scp
+*** Shells
+- Shell in Emacs is not a 1-to-1 output of the mintty. Remote access started via shell is broken, requires fakecygpty to fix it and still has problems sending interrupt signals like C-c
+- Workaround: Start a mintty directly from windows
+- Powershell can not be used as an emacs shell, see powershell package description
+** Basic Git Configuration for Github
+Open Mintty, then enter commands beleow after filing in your personal details
+#+BEGIN_SRC bash
+git config --global user.email "myusername@myemailprovider.com"
+git config --global user.name "My Name"
+git config credential.https://github.com.username githubusername
+git config --global credential.helper store
+git remote add origin https://github.com/githubusername/yourrepositoryname.git
+git push -u origin master
+Password for 'https://githubusername@github.com':XXXXXXXXXXXX
+git remote -v
+#+END_SRC
+
+** Packages currently installed
+*** $pacman -Qe
+asciidoc 10.2.0-3
+autoconf-wrapper 20221207-1
+autoconf2.13 2.13-5
+autogen 5.18.16-4
+automake-wrapper 20221207-1
+automake1.10 1.10.3-5
+automake1.11 1.11.6-6
+automake1.12 1.12.6-6
+automake1.13 1.13.4-7
+automake1.14 1.14.1-6
+automake1.15 1.15.1-4
+automake1.6 1.6.3-4
+automake1.7 1.7.9-4
+automake1.8 1.8.5-5
+automake1.9 1.9.6-4
+base 2022.06-1
+bash 5.2.009-1
+bash-completion 2.11-3
+binutils 2.40-1
+bison 3.8.2-4
+bsdcpio 3.6.2-3
+bsdtar 3.6.2-3
+btyacc 20221106-1
+bzip2 1.0.8-4
+clang-svn 60106.1d5b05f-1
+cmake 3.25.1-1
+cocom 0.996-3
+coreutils 8.32-5
+curl 7.88.1-1
+cyrus-sasl 2.1.28-2
+diffstat 1.65-1
+diffutils 3.8-4
+dos2unix 7.4.4-1
+dtc 1.6.1-3
+elinks-git 0.13.4008.f86be659-10
+file 5.44-5
+filesystem 2023.02.07-1
+findutils 4.9.0-3
+fish 3.6.0-1
+flex 2.6.4-3
+fzy 1.0-1
+gawk 5.2.1-2
+gcc 11.3.0-3
+gcc-fortran 11.3.0-3
+gcc-libs 11.3.0-3
+gdb 11.1-6
+getent 2.18.90-4
+gettext-devel 0.21-2
+git 2.39.2-1
+gnu-netcat 0.7.1-2
+gperf 3.1-5
+grep 1~3.0-6
+groff 1.22.4-4
+gzip 1.12-2
+heimdal 7.8.0-3
+help2man 1.49.2-1
+inetutils 1.9.4-5
+info 7.0.2-1
+intltool 0.51.0-3
+iperf3 3.12-2
+less 629-1
+lftp 4.9.2-4
+libargp 20110921-4
+libtool 2.4.7-3
+libunrar 6.2.2-1
+libunrar-devel 6.2.2-1
+lndir 1.0.4-1
+lzop 1.04-1
+make 4.4-1
+man-db 2.10.2-3
+mingw-w64-i686-tree-sitter 0.20.7-1
+mingw-w64-x86_64-binutils 2.40-2
+mingw-w64-x86_64-crt-git 10.0.0.r228.g40134887f-1
+mingw-w64-x86_64-ffmpeg 5.1.2-2
+mingw-w64-x86_64-gcc 12.2.0-10
+mingw-w64-x86_64-gcc-fortran 12.2.0-10
+mingw-w64-x86_64-gcc-libgfortran 12.2.0-10
+mingw-w64-x86_64-gdb 13.1-3
+mingw-w64-x86_64-gnuplot 5.4.6-1
+mingw-w64-x86_64-go 1.20-1
+mingw-w64-x86_64-graphviz 2.44.1-12
+mingw-w64-x86_64-headers-git 10.0.0.r228.g40134887f-1
+mingw-w64-x86_64-hunspell 1.7.2-1
+mingw-w64-x86_64-hunspell-en 2020.12.07-1
+mingw-w64-x86_64-imagemagick 7.1.0.62-1
+mingw-w64-x86_64-libgccjit 12.2.0-10
+mingw-w64-x86_64-libmangle-git 10.0.0.r228.g40134887f-1
+mingw-w64-x86_64-libpng 1.6.39-1
+mingw-w64-x86_64-lua-lpeg 1.0.2-2
+mingw-w64-x86_64-lua-luarocks 3.9.0-1
+mingw-w64-x86_64-make 4.4-2
+mingw-w64-x86_64-pkgconf 1~1.8.0-2
+mingw-w64-x86_64-poppler 23.02.0-1
+mingw-w64-x86_64-tidy 5.8.0-1
+mingw-w64-x86_64-tools-git 10.0.0.r228.g40134887f-1
+mingw-w64-x86_64-winpthreads-git 10.0.0.r228.g40134887f-1
+mingw-w64-x86_64-winstorecompat-git 10.0.0.r228.g40134887f-1
+mintty 1~3.6.3-1
+mosh 1.4.0-4
+msys2-keyring 1~20221024-1
+msys2-launcher 1.5-1
+msys2-runtime 3.4.6-1
+msys2-runtime-devel 3.4.6-1
+msys2-w32api-headers 10.0.0.r16.g49a56d453-1
+msys2-w32api-runtime 10.0.0.r16.g49a56d453-1
+mutt 2.2.9-1
+ncurses 6.4-1
+nettle 3.8.1-1
+openssh 9.2p1-1
+p7zip 17.04-1
+pacman 6.0.1-32
+pacman-mirrors 20221016-1
+pactoys r55.8860e1f-1
+patch 2.7.6-2
+patchutils 0.4.2-3
+pax 20201030-2
+pcre2 10.42-1
+perl 5.36.0-1
+perl-JSON 4.05-1
+pkgconf 1.9.4-1
+pkgfile 21-2
+procps-ng 3.3.17-1
+psmisc 23.4-1
+pwgen 2.08-1
+python 3.11.2-1
+python-pip 23.0-2
+quilt 0.66-3
+rcs 5.10.1-2
+rebase 4.5.0-2
+reflex 20221012-1
+rsync 3.2.7-2
+ruby 3.1.3-2
+scons 3.1.2-9
+screenfetch 3.9.1-1
+sed 4.9-1
+sshpass 1.10-1
+swig 4.0.2-3
+tar 1.34-3
+task 2.6.2-1
+texinfo 7.0.2-1
+texinfo-tex 7.0.2-1
+tftp-hpa 5.2-4
+time 1.9-3
+tmux 3.3.a-1
+tree 2.0.4-1
+ttyrec 1.0.8-2
+tzcode 2022g-1
+unrar 6.2.2-1
+unzip 6.0-2
+util-linux 2.35.2-3
+w3m 0.5.3+20220429-2
+wcd 6.0.4-3
+which 2.21-4
+whois 5.5.14-1
+winpty 0.4.3-1
+xmlto 0.0.28-4
+zip 3.0-3
+zsh 5.9-2
+zsh-doc 5.9-2
+* Examples
+** Latex
+#+begin_src latex :file fsa.pdf :packages '(("" "tikz")) :border 1em
+  % Define block styles
+  \usetikzlibrary{shapes,arrows}
+  \tikzstyle{astate} = [circle, draw, text centered, font=\footnotesize, fill=blue!25]
+  \tikzstyle{rstate} = [circle, draw, text centered, font=\footnotesize, fill=red!25]
+
+  \begin{tikzpicture}[->,>=stealth', shorten >=1pt, auto, node distance=2.8cm, semithick]
+    \node [astate] (1) at (0,0) {1};
+    \node [astate] (2) at (1,0) {2};
+    \node [rstate] (3) at (2,0) {3};
+    \path (1) edge [bend left] node {b} (2)
+          (2) edge node {b} (3)
+          (2) edge [bend left] node {a} (1)
+          (3) edge [loop above] node {(a, b)} (3);
+  \end{tikzpicture}
+#+end_src
+** Latex-Letter Export: (C-c C-e l o)
+# #+title: Comment out, or do not use
+#+date: Wednesday
+
+#+options: toc:nil
+
+#+latex_header: \usepackage[osf]{Baskervaldx}
+
+#+latex_class: letter
+
+#+latex_header: \signature{Lucy}
+#+latex_header: \address{17, Chatham Street}
+
+#+latex: \begin{letter}{[s.l.]}
+#+latex: \opening{My dearest Mina,---}
+
+I must say you tax me very unfairly with being a bad correspondent.
+I wrote to you /twice/ since we parted, and your last letter was only your /second/.
+Besides, I have nothing to tell you.  There is really nothing to interest you.
+Town is very pleasant just now, and we go a good deal to picture-galleries
+and for walks and rides in the park.  As to the tall, curly-haired man,
+I suppose it was the one who was with me at the last Pop.  Some one has evidently
+been telling tales.  That was Mr. Holmwood.  He often comes to see us, and he and
+mamma get on very well together; they have so many things to talk about in common.
+We met some time ago a man that would just /do for you/, if you were not already
+engaged to Jonathan.  He is an excellent /parti/, being handsome, well off, and
+of good birth.  He is a doctor and really clever.  Just fancy!
+He is only nine-and-twenty, and he has an immense lunatic asylum all under his own care.
+
+#+latex: \closing{Sincerely,}
+#+latex: \ps{P.S.  I need not tell you this is a secret.  Good-night again.}
+#+latex: \end{letter}
+** Org-plot
+#+PLOT: title:"example table" ind:1 type:2d with:lines
+#+tblname: data-plot
+| independent var | first dependent var | second dependent var |
+|-----------------+---------------------+----------------------|
+|             0.1 |               0.425 |                0.375 |
+|             0.2 |              0.3125 |               0.3375 |
+|             0.3 |          0.24999993 |           0.28333338 |
+|             0.4 |               0.275 |              0.28125 |
+|             0.5 |                0.26 |                 0.27 |
+|             0.6 |          0.25833338 |           0.24999993 |
+|             0.7 |          0.24642845 |           0.23928553 |
+|             0.8 |             0.23125 |               0.2375 |
+|             0.9 |          0.23333323 |            0.2333332 |
+|               1 |              0.2225 |                 0.22 |
+|             1.1 |          0.20909075 |           0.22272708 |
+|             1.2 |          0.19999998 |           0.21458333 |
+|             1.3 |          0.19615368 |           0.21730748 |
+|             1.4 |          0.18571433 |           0.21071435 |
+|             1.5 |          0.19000008 |            0.2150001 |
+|             1.6 |           0.1828125 |            0.2046875 |
+|             1.7 |          0.18088253 |            0.1985296 |
+|             1.8 |          0.17916675 |           0.18888898 |
+|             1.9 |          0.19342103 |           0.21315783 |
+|               2 |                0.19 |              0.21625 |
+|             2.1 |          0.18214268 |           0.20714265 |
+|             2.2 |          0.17727275 |            0.2022727 |
+|             2.3 |           0.1739131 |            0.1989131 |
+|             2.4 |          0.16770833 |            0.1916667 |
+|             2.5 |               0.164 |                0.188 |
+|             2.6 |          0.15769238 |           0.18076923 |
+|             2.7 |           0.1592591 |            0.1888887 |
+|             2.8 |           0.1598214 |           0.18928565 |
+|             2.9 |          0.15603453 |            0.1844828 |
+
+#+begin_src gnuplot :var data=data-plot :exports both :file data-plot.svg
+reset
+set title "example table"
+set xlabel "X"
+set ylabel "Y"
+
+plot data u 1:2 w l lw 1 title 'first dependent var', \
+     data u 1:3 w l lw 1 title 'second dependent var'
+#+end_src
+** Graphviz
+#+BEGIN_SRC dot :file dotsuccess.svg :cmdline -Kdot -Tsvg
+digraph hierarchy {
+
+		nodesep=1.0 // increases the separation between nodes
+		
+		node [color=Red,fontname=Courier,shape=box] //All nodes will this shape and colour
+		edge [color=Blue, style=dashed] //All the lines look like this
+
+		Headteacher->{Deputy1 Deputy2 BusinessManager}
+		Deputy1->{Teacher1 Teacher2}
+		BusinessManager->ITManager
+		{rank=same;ITManager Teacher1 Teacher2}  // Put them on the same level
+}
+#+END_SRC
+** Compile-example of pdf-tools-installation
+#+BEGIN_SRC html
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<!-- Created by htmlize-1.54 in css mode. -->
+<html>
+  <head>
+    <title>*compilation*</title>
+    <style type="text/css">
+    <!--
+      body {
+        color: #ffffff;
+        background-color: #000000;
+      }
+      .comint-highlight-input {
+        /* comint-highlight-input */
+        font-weight: bold;
+      }
+      .comint-highlight-prompt {
+        /* comint-highlight-prompt */
+        color: #b4fa70;
+      }
+      .comint-highlight-prompt {
+        /* comint-highlight-prompt */
+        color: #b4fa70;
+      }
+      .compilation-line-number {
+        /* compilation-line-number */
+        color: #b4fa70;
+      }
+      .function-name {
+        /* font-lock-function-name-face */
+        color: #fce94f;
+      }
+
+      a {
+        color: inherit;
+        background-color: inherit;
+        font: inherit;
+        text-decoration: inherit;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+    -->
+    </style>
+  </head>
+  <body>
+    <pre>
+J-*- mode: compilation; default-directory: "~/.emacs.d/elpa/pdf-tools-20180422.935/build/server/" -*-
+Comint started at Tue Apr 24 03:41:34
+
+c\:/\!Data/home/jlange/.emacs.d/elpa/pdf-tools-20180422.935/build/server/autobuild -i c\:/\!Software/Portable/Emacs/bin/
+---------------------------
+    Installing packages    
+---------------------------
+pacman -S --needed base-devel
+                      mingw-w64-x86_64-libpng
+                      mingw-w64-x86_64-poppler
+                      mingw-w64-x86_64-toolchain
+                      mingw-w64-x86_64-zlib
+:: Es befinden sich 55 Mitglieder in Gruppe base-devel:
+:: Repositorium msys
+
+<span class="comint-highlight-prompt"><span class="comint-highlight-prompt">Geben Sie eine Auswahl ein (Voreinstellung=alle): </span></span>
+<span class="function-name">Warnung</span>: asciidoc-8.6.9-4 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: autoconf-2.69-3 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: autoconf2.13-2.13-2 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: autogen-5.18.12-2 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: automake-wrapper-10-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: automake1.10-1.10.3-3 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: automake1.11-1.11.6-3 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: automake1.12-1.12.6-3 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: automake1.13-1.13.4-4 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: automake1.14-1.14.1-3 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: automake1.15-1.15.1-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: automake1.6-1.6.3-2 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: automake1.7-1.7.9-2 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: automake1.8-1.8.5-3 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: automake1.9-1.9.6-2 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: bison-3.0.4-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: diffstat-1.61-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: diffutils-3.5-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: dos2unix-7.4.0-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: file-5.33-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: flex-2.6.4-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: gawk-4.2.0-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: gdb-7.11.1-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: gettext-0.19.8.1-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: gettext-devel-0.19.8.1-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: gperf-3.1-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: grep-3.0-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: groff-1.22.3-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: help2man-1.47.5-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: intltool-0.51.0-2 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: lemon-3.8.7.0-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: libtool-2.4.6-2 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: libunrar-5.5.3-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: libunrar-devel-5.5.3-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: m4-1.4.18-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: make-4.2.1-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: man-db-2.7.6-3 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: pacman-5.0.1-5 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: pactoys-git-r2.07ca37f-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: patch-2.7.6-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: patchutils-0.3.4-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: perl-5.24.4-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: pkg-config-0.29.2-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: pkgfile-17-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: quilt-0.65-2 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: rcs-5.9.4-2 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: scons-2.5.1-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: sed-4.4-2 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: swig-3.0.12-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: texinfo-6.3-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: texinfo-tex-6.3-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: ttyrec-1.0.8-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: unrar-5.5.3-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: wget-1.19.4-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: xmlto-0.0.28-1 ist aktuell -- &#220;berspringe
+   1) asciidoc  2) autoconf  3) autoconf2.13  4) autogen  5) automake-wrapper  6) automake1.10  7) automake1.11  8) automake1.12  9) automake1.13  10) automake1.14  11) automake1.15  12) automake1.6  13) automake1.7  14) automake1.8  15) automake1.9  16) bison  17) diffstat  18) diffutils  19) dos2unix  20) file  21) flex  22) gawk  23) gdb  24) gettext  25) gettext-devel  26) gperf  27) grep  28) groff  29) help2man  30) intltool  31) lemon  32) libtool  33) libunrar  34) libunrar-devel  35) m4  36) make  37) man-db  38) pacman  39) pactoys-git  40) patch  41) patchutils  42) perl  43) pkg-config  44) pkgfile  45) quilt  46) rcs  47) scons  48) sed  49) swig  50) texinfo  51) texinfo-tex  52) ttyrec  53) unrar  54) wget  55) xmlto
+:: Es befinden sich 17 Mitglieder in Gruppe mingw-w64-x86_64-toolchain:
+:: Repositorium mingw64
+
+<span class="comint-highlight-prompt"><span class="comint-highlight-prompt">Geben Sie eine Auswahl ein (Voreinstellung=alle): </span></span>
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-binutils-2.30-2 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-crt-git-6.0.0.5125.b491fac6-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-gcc-7.3.0-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-gcc-ada-7.3.0-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-gcc-fortran-7.3.0-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-gcc-libgfortran-7.3.0-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-gcc-libs-7.3.0-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-gcc-objc-7.3.0-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-gdb-8.0.1-4 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-headers-git-6.0.0.5125.b491fac6-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-libmangle-git-6.0.0.5079.3b7a42fd-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-libwinpthread-git-6.0.0.5098.2464b7e6-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-make-4.2.1-2 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-pkg-config-0.29.2-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-tools-git-6.0.0.5111.3bc5ab74-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-winpthreads-git-6.0.0.5098.2464b7e6-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-winstorecompat-git-5.0.0.4760.d3089b5-1 ist aktuell -- &#220;berspringe
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-zlib-1.2.11-1 ist aktuell -- &#220;berspringe
+   1) mingw-w64-x86_64-binutils  2) mingw-w64-x86_64-crt-git  3) mingw-w64-x86_64-gcc  4) mingw-w64-x86_64-gcc-ada  5) mingw-w64-x86_64-gcc-fortran  6) mingw-w64-x86_64-gcc-libgfortran  7) mingw-w64-x86_64-gcc-libs  8) mingw-w64-x86_64-gcc-objc  9) mingw-w64-x86_64-gdb  10) mingw-w64-x86_64-headers-git  11) mingw-w64-x86_64-libmangle-git  12) mingw-w64-x86_64-libwinpthread-git  13) mingw-w64-x86_64-make  14) mingw-w64-x86_64-pkg-config  15) mingw-w64-x86_64-tools-git  16) mingw-w64-x86_64-winpthreads-git  17) mingw-w64-x86_64-winstorecompat-git
+L&#246;se Abh&#228;ngigkeiten auf...
+Suche nach in Konflikt stehenden Paketen...
+<span class="function-name">Warnung</span>: Abh&#228;ngigkeits-Zyklus entdeckt:
+<span class="function-name">Warnung</span>: mingw-w64-x86_64-harfbuzz wird vor seiner Abh&#228;ngigkeit mingw-w64-x86_64-freetype installiert werden
+
+Pakete (29) mingw-w64-x86_64-brotli-1.0.3-1  mingw-w64-x86_64-c-ares-1.13.0-4  mingw-w64-x86_64-cairo-1.15.12-1  mingw-w64-x86_64-curl-7.59.0-2  mingw-w64-x86_64-fontconfig-2.13.0-1  mingw-w64-x86_64-freetype-2.9-1  mingw-w64-x86_64-glib2-2.56.1-1  mingw-w64-x86_64-graphite2-1.3.11-1  mingw-w64-x86_64-harfbuzz-1.7.5-2  mingw-w64-x86_64-icu-61.1-1  mingw-w64-x86_64-jansson-2.10-1  mingw-w64-x86_64-lcms2-2.8-1  mingw-w64-x86_64-libidn2-2.0.4-1  mingw-w64-x86_64-libjpeg-turbo-1.5.3-1  mingw-w64-x86_64-libmetalink-0.1.3-3  mingw-w64-x86_64-libssh2-1.8.0-1  mingw-w64-x86_64-libtiff-4.0.9-1  mingw-w64-x86_64-libunistring-0.9.8-1  mingw-w64-x86_64-lzo2-2.10-1  mingw-w64-x86_64-nghttp2-1.31.0-1  mingw-w64-x86_64-nspr-4.19-1  mingw-w64-x86_64-nss-3.36.1-1  mingw-w64-x86_64-openjpeg2-2.3.0-1  mingw-w64-x86_64-pcre-8.42-1  mingw-w64-x86_64-pixman-0.34.0-3  mingw-w64-x86_64-poppler-data-0.4.8-1  mingw-w64-x86_64-wineditline-2.201-1  mingw-w64-x86_64-libpng-1.6.34-1  mingw-w64-x86_64-poppler-0.63.0-2
+
+Gesamtgr&#246;&#223;e des Downloads:            35,08 MiB
+Gesamtgr&#246;&#223;e der installierten Pakete:  212,04 MiB
+
+<span class="comint-highlight-prompt"><span class="comint-highlight-prompt">:: Installation fortsetzen? [J/n] </span></span><span class="comint-highlight-input">J</span>
+J
+:: Empfange Pakete...
+Lade mingw-w64-x86_64-libpng-1.6.34-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-wineditline-2.201-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-pcre-8.42-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-glib2-2.56.1-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-graphite2-1.3.11-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-harfbuzz-1.7.5-2-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-freetype-2.9-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-fontconfig-2.13.0-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-lzo2-2.10-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-pixman-0.34.0-3-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-cairo-1.15.12-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-c-ares-1.13.0-4-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-brotli-1.0.3-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-libunistring-0.9.8-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-libidn2-2.0.4-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-libmetalink-0.1.3-3-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-libssh2-1.8.0-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-jansson-2.10-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-nghttp2-1.31.0-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-curl-7.59.0-2-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-icu-61.1-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-icu-61.1-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-icu-61.1-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-icu-61.1-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-icu-61.1-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-libjpeg-turbo-1.5.3-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-libtiff-4.0.9-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-lcms2-2.8-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-nspr-4.19-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-nss-3.36.1-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-openjpeg2-2.3.0-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-poppler-data-0.4.8-1-any.pkg.tar.xz herunter...
+Lade mingw-w64-x86_64-poppler-0.63.0-2-any.pkg.tar.xz herunter...
+Pr&#252;fe Schl&#252;sselring...
+Pr&#252;fe Paketintegrit&#228;t...
+Lade Paket-Dateien...
+Pr&#252;fe auf Dateikonflikte...
+&#220;berpr&#252;fe verf&#252;gbaren Festplattenspeicher...
+:: Verarbeite Paket&#228;nderungen...
+Installiere mingw-w64-x86_64-libpng...
+Installiere mingw-w64-x86_64-wineditline...
+Installiere mingw-w64-x86_64-pcre...
+Installiere mingw-w64-x86_64-glib2...
+Keine Schema-Dateien gefunden: Nichts wird getan.
+Installiere mingw-w64-x86_64-graphite2...
+Installiere mingw-w64-x86_64-harfbuzz...
+Optionale Abh&#228;ngigkeiten f&#252;r mingw-w64-x86_64-harfbuzz
+    mingw-w64-x86_64-icu: harfbuzz-icu support [ausstehend]
+    mingw-w64-x86_64-cairo: hb-view program [ausstehend]
+Installiere mingw-w64-x86_64-freetype...
+Installiere mingw-w64-x86_64-fontconfig...
+
+  Fontconfig configuration is done via /mingw64/etc/fonts/conf.avail and conf.d.
+  Read /mingw64/etc/fonts/conf.d/README for more information.
+
+updating font cache... done.
+Installiere mingw-w64-x86_64-lzo2...
+Installiere mingw-w64-x86_64-pixman...
+Installiere mingw-w64-x86_64-cairo...
+Optionale Abh&#228;ngigkeiten f&#252;r mingw-w64-x86_64-cairo
+    mingw-w64-x86_64-glib2: libcairo-gobject [Installiert]
+Installiere mingw-w64-x86_64-c-ares...
+Installiere mingw-w64-x86_64-brotli...
+Installiere mingw-w64-x86_64-libunistring...
+Installiere mingw-w64-x86_64-libidn2...
+Installiere mingw-w64-x86_64-libmetalink...
+Installiere mingw-w64-x86_64-libssh2...
+Installiere mingw-w64-x86_64-jansson...
+Installiere mingw-w64-x86_64-nghttp2...
+Installiere mingw-w64-x86_64-curl...
+Installiere mingw-w64-x86_64-icu...
+Installiere mingw-w64-x86_64-libjpeg-turbo...
+Installiere mingw-w64-x86_64-libtiff...
+Installiere mingw-w64-x86_64-lcms2...
+Installiere mingw-w64-x86_64-nspr...
+Installiere mingw-w64-x86_64-nss...
+Installiere mingw-w64-x86_64-openjpeg2...
+Installiere mingw-w64-x86_64-poppler-data...
+Installiere mingw-w64-x86_64-poppler...
+Optionale Abh&#228;ngigkeiten f&#252;r mingw-w64-x86_64-poppler
+    mingw-w64-x86_64-glib2: libpoppler-glib [Installiert]
+    mingw-w64-x86_64-qt5: libpoppler-qt5
+
+---------------------------
+ Configuring and compiling 
+---------------------------
+autoreconf -i
+<span class="function-name">configure.ac</span>:15: installing './ar-lib'
+<span class="function-name">configure.ac</span>:11: installing './compile'
+<span class="function-name">configure.ac</span>:78: installing './config.guess'
+<span class="function-name">configure.ac</span>:78: installing './config.sub'
+<span class="function-name">configure.ac</span>:6: installing './install-sh'
+<span class="function-name">configure.ac</span>:6: installing './missing'
+<span class="function-name">Makefile.am</span>: installing './depcomp'
+./configure -q --bindir=c:/!Software/Portable/Emacs/bin/ &amp;&amp; make -s
+
+Is case-sensitive searching enabled ?     yes
+Is modifying text annotations enabled ?   yes
+Is modifying markup annotations enabled ? yes
+
+
+---------------------------
+       Installing          
+---------------------------
+make -s install
+<span class="function-name">make</span>[<span class="compilation-line-number">1</span>]: Verzeichnis &#8222;/c/!Data/home/jlange/.emacs.d/elpa/pdf-tools-20180422.935/build/server&#8220; wird betreten
+ /usr/bin/mkdir -p 'c:/!Software/Portable/Emacs/bin'
+  /usr/bin/install -c epdfinfo.exe 'c:/!Software/Portable/Emacs/bin'
+<span class="function-name">make</span>[<span class="compilation-line-number">1</span>]: F&#252;r das Ziel &#8222;install-data-am&#8220; ist nichts zu tun.
+<span class="function-name">make</span>[<span class="compilation-line-number">1</span>]: Verzeichnis &#8222;/c/!Data/home/jlange/.emacs.d/elpa/pdf-tools-20180422.935/build/server&#8220; wird verlassen
+<span class="function-name">cp</span>: regul&#228;re Datei 'c:/!Software/Portable/Emacs/bin/libwinpthread-1.dll' kann nicht angelegt werden: Device or resource busy
+<span class="function-name">cp</span>: regul&#228;re Datei 'c:/!Software/Portable/Emacs/bin/libgcc_s_seh-1.dll' kann nicht angelegt werden: Device or resource busy
+<span class="function-name">cp</span>: regul&#228;re Datei 'c:/!Software/Portable/Emacs/bin/libintl-8.dll' kann nicht angelegt werden: Device or resource busy
+<span class="function-name">cp</span>: regul&#228;re Datei 'c:/!Software/Portable/Emacs/bin/libunistring-2.dll' kann nicht angelegt werden: Device or resource busy
+
+===========================
+   Build succeeded. :O)    
+===========================
+
+Comint finished at Tue Apr 24 04:06:01
+</pre>
+  </body>
+</html>
+#+END_SRC
+** Batch file Convert .txt and .cfg Files to .org, Save as .bat and execute where needed
+#+BEGIN_SRC shell
+REM Uses foldername as top level and filenames as secondary level
+for %%* in (.) do (echo * %%~nx* >> output.org)
+for /r %%i in (*.txt) (*.cfg) do (
+if not %%~nxi == output.org (
+echo ** %%~nxi >> output.org
+type "%%i" >> output.org
+echo. >> output.org
+)
+)
+#+END_SRC

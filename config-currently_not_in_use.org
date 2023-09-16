@@ -1,0 +1,1168 @@
+Working packages and functions that are rarely used. Put obsolete stuff in obsolete.el
+* External Packages - Additional Function
+** AES
+Implementation of AES in ELisp
+https://github.com/Sauermann/emacs-aes
+#+BEGIN_SRC emacs-lisp
+  (use-package aes)
+#+END_SRC
+** Apache-Mode
+Major mode for editing Apache HTTP Server configuration files.
+https://github.com/emacs-php/apache-mode
+#+BEGIN_SRC emacs-lisp
+  (use-package apache-mode)
+#+END_SRC
+** Auto-Update
+Automatically update Emacs packages.
+https://github.com/rranelli/auto-package-update.el
+#+BEGIN_SRC emacs-lisp
+  (use-package auto-package-update
+    :custom
+    (auto-package-update-delete-old-versions t)
+    (auto-package-update-interval 4)
+    :config
+    (auto-package-update-maybe))
+#+END_SRC
+** BBDB
+*** BBDB
+The Insidious Big Brother Database provides an address book for email and snail mail addresses, phone numbers and the like.  It can be linked with various Emacs mail clients (Message and Mail mode, Rmail, Gnus, MH-E, Mu4e, VM, and Wanderlust).
+https://elpa.gnu.org/packages/bbdb.html
+#+BEGIN_SRC emacs-lisp
+  (use-package bbdb)
+#+END_SRC
+*** BBDB-VCard
+Imports and exports vCards (version 3.0) as defined in RFC 2425 and RFC 2426 to/from BBDB. Version 2.1 vCards are converted into version 3.0 on import.
+https://github.com/tohojo/bbdb-vcard
+#+BEGIN_SRC emacs-lisp
+  (use-package bbdb-vcard)
+#+END_SRC
+** Boon
+Ergonomic Command Mode for modal editing.
+https://github.com/jyp/boon
+#+BEGIN_SRC emacs-lisp
+  (use-package boon)
+  (use-package boon-qwertz) 
+#+END_SRC
+** Celestial Mode-Line
+Display lunar phase and sunrise/sunset time in mode line
+=Pay attention to add-to-list Syntax, otherwise it won't show up without an error=
+https://github.com/ecraven/celestial-mode-line
+#+BEGIN_SRC emacs-lisp
+  (use-package celestial-mode-line
+    :init
+    (add-to-list 'global-mode-string 'celestial-mode-line-string t)
+    (defvar celestial-mode-line-sunrise-sunset-alist '((sunrise . "*↑ ") (sunset . "*↓ "))) ;; Change icons.
+    :config
+    (celestial-mode-line-start-timer))
+#+END_SRC
+** Command-Log-Mode
+Show event history and command history of some or all buffers.
+https://github.com/lewang/command-log-mode
+Unmaintained - currently no alternative
+#+BEGIN_SRC emacs-lisp
+  (use-package command-log-mode
+    :bind
+    ("C-H-l" . clm/toggle-command-log-buffer))
+#+END_SRC
+** Consult-Eglot
+This package acts as a parallel of consult-lsp for eglot and provides a front-end interface for the workspace/symbols LSP procedure call.
+https://github.com/mohkale/consult-eglot
+#+BEGIN_SRC emacs-lisp
+  (use-package consult-eglot)
+#+END_SRC
+** Corfu
+=Too many problems when using it as a drop-in replacement for company=
+Corfu enhances completion at point with a small completion popup. The current candidates are shown in a popup below or above the point. Corfu is the minimalistic completion-in-region counterpart of the Vertico minibuffer UI.
+#+BEGIN_SRC emacs-lisp
+  (use-package corfu
+    :custom
+    (corfu-cycle t)
+    (corfu-auto t)
+    :config
+    (global-corfu-mode)
+    (corfu-echo-mode))
+#+END_SRC
+** Crux
+Collection of Ridiculously Useful eXtensions.
+https://github.com/bbatsov/crux
+#+BEGIN_SRC emacs-lisp
+    (use-package crux
+      :bind
+      ("S-s-<SPC> j" . crux-top-join-line)
+      ("S-s-<SPC> <up>" . crux-smart-open-line-above)
+      ("S-s-<SPC> <down>" . crux-smart-open-line)
+      ("S-s-<SPC> a" . crux-move-beginning-of-line)
+      ("S-s-<SPC> s" . crux-create-scratch-buffer)
+      ("S-s-<SPC> d" . crux-duplicate-current-line-or-region)
+      ("S-s-<SPC> D" . crux-delete-file-and-buffer)
+      ("S-s-<SPC> f" . crux-recentf-find-file)
+      ("S-s-<SPC> r" . crux-rename-buffer-and-file))
+#+END_SRC
+** CRDT
+Collaborative editing using Conflict-free Replicated Data Types
+https://elpa.gnu.org/packages/crdt.html
+#+BEGIN_SRC emacs-lisp
+  (use-package crdt)
+#+END_SRC
+** CSV-Mode
+Major mode for editing records in a generalized CSV (character-separated values) format.
+https://elpa.gnu.org/packages/csv-mode.html
+Using Excel instead
+#+BEGIN_SRC emacs-lisp
+  (use-package csv-mode
+    :custom
+    (csv-separators '("," ";"))
+    :mode
+    ("\\.csv\\'" . csv-mode))
+#+END_SRC
+** Diff-HL
+Highlights uncommitted changes on the left side of the window (area also known as the "gutter"), allows you to jump between and revert them selectively.
+https://github.com/dgutov/diff-hl
+#+BEGIN_SRC emacs-lisp
+  (use-package diff-hl
+    :hook
+    (prog-mode . turn-on-diff-hl-mode)
+    (undo-propose-mode . turn-on-diff-hl-mode)
+    (vc-dir-mode . turn-on-diff-hl-mode)
+    (dired-mode . diff-hl-dired-mode))
+#+END_SRC
+** Dired
+*** Dired Fontlock
+Extra font lock rules for a more colourful dired.
+https://github.com/purcell/diredfl
+#+BEGIN_SRC emacs-lisp
+  (use-package diredfl
+    :commands
+    (dired)
+    :hook
+    (dired-mode . diredfl-mode))
+#+END_SRC
+*** Dired Hacks
+**** Core
+Collection of useful dired additions. All shared functionality and helpers will be extracted into a single package dired-hacks-utils, so that will be the only dependence.
+https://github.com/Fuco1/dired-hacks
+#+BEGIN_SRC emacs-lisp
+  (use-package dired-hacks-utils
+    :commands
+    (dired))
+#+END_SRC
+**** Dired Narrow
+Provides live filtering of files in dired buffers. In general, after calling the respective narrowing function you type a filter string into the minibuffer. After each change the changes automatically reflect in the buffer. Typing C-g will cancel the narrowing and restore the original view, typing RET will exit the live filtering mode and leave the dired buffer in the narrowed state. To bring it back to the original view, you can call revert-buffer (usually bound to g).
+https://github.com/Fuco1/dired-hacks#dired-narrow
+#+BEGIN_SRC emacs-lisp
+  (use-package dired-narrow
+    :commands
+    (dired)
+    :bind
+    (
+    :map dired-mode-map
+    ("s-n" . dired-narrow)))
+#+END_SRC
+**** Dired Subtree
+The basic command to work with subdirectories in dired is i, which inserts the subdirectory as a separate listing in the active dired buffer. This package defines function dired-subtree-insert which instead inserts the subdirectory directly below its line in the original listing, and indent the listing of subdirectory to resemble a tree-like structure (somewhat similar to tree(1) except the pretty graphics). The tree display is somewhat more intuitive than the default "flat" subdirectory manipulation provided by i.
+https://github.com/Fuco1/dired-hacks#dired-subtree
+#+BEGIN_SRC emacs-lisp
+  (use-package dired-subtree
+    :bind
+    (
+    :map dired-mode-map
+    ("<tab>" . dired-subtree-toggle)
+    ("<C-tab>" . dired-subtree-cycle)))
+#+END_SRC
+*** Custom Functions
+**** Open in external app by Xah
+#+BEGIN_SRC emacs-lisp
+  (defun my-open-in-external-app (&optional @fname)
+    "Open the current file or dired marked files in external app. The app is chosen from your OS's preference. When called in emacs lisp, if @fname is given, open that. URL `http://ergoemacs.org/emacs/emacs_dired_open_file_in_ext_apps.html' Version 2019-11-04"
+    (interactive)
+    (let* (
+           ($file-list
+            (if @fname
+                (progn (list @fname))
+              (if (string-equal major-mode "dired-mode")
+                  (dired-get-marked-files)
+                (list (buffer-file-name)))))
+           ($do-it-p (if (<= (length $file-list) 5)
+                         t
+                       (y-or-n-p "Open more than 5 files? "))))
+      (when $do-it-p
+        (cond
+         ((string-equal system-type "windows-nt")
+          (mapc
+           (lambda ($fpath)
+             (w32-shell-execute "open" $fpath)) $file-list))
+         ((string-equal system-type "darwin")
+          (mapc
+           (lambda ($fpath)
+             (shell-command
+              (concat "open " (shell-quote-argument $fpath))))  $file-list))
+         ((string-equal system-type "gnu/linux")
+          (mapc
+           (lambda ($fpath) (let ((process-connection-type nil))
+                              (start-process "" nil "xdg-open" $fpath))) $file-list))))))
+#+END_SRC
+**** Show-in-Desktop by Xah
+#+BEGIN_SRC emacs-lisp
+(defun my-show-in-desktop ()
+  "Show current file in desktop.
+ (Mac Finder, Windows Explorer, Linux file manager)
+ This command can be called when in a file or in `dired'.
+
+URL `http://ergoemacs.org/emacs/emacs_dired_open_file_in_ext_apps.html'
+Version 2019-11-04"
+  (interactive)
+  (let (($path (if (buffer-file-name) (buffer-file-name) default-directory )))
+    (cond
+     ((string-equal system-type "windows-nt")
+      (w32-shell-execute "open" default-directory))
+     ((string-equal system-type "darwin")
+      (if (eq major-mode 'dired-mode)
+          (let (($files (dired-get-marked-files )))
+            (if (eq (length $files) 0)
+                (shell-command (concat "open " default-directory))
+              (shell-command (concat "open -R " (shell-quote-argument (car (dired-get-marked-files )))))))
+        (shell-command
+         (concat "open -R " $path))))
+     ((string-equal system-type "gnu/linux")
+      (let (
+            (process-connection-type nil)
+            (openFileProgram (if (file-exists-p "/usr/bin/gvfs-open")
+                                 "/usr/bin/gvfs-open"
+                               "/usr/bin/xdg-open")))
+        (start-process "" nil openFileProgram $path))
+      ;; (shell-command "xdg-open .") ;; 2013-02-10 this sometimes froze emacs till the folder is closed. eg with nautilus
+      ))))
+#+END_SRC
+** Elfeed
+Extensible web feed reader, supporting Atom and RSS. 
+https://github.com/skeeto/elfeed
+#+BEGIN_SRC emacs-lisp
+  (use-package elfeed
+    :bind
+    ("s-f" . elfeed)
+    :commands
+    (elfeed)
+    :custom
+    (elfeed-feeds
+     (quote ("https://www.linogate.de/de/download/update.rss"
+             "https://investors.avaya.com/rss/pressrelease.aspx"
+             "https://investors.avaya.com/rss/event.aspx"
+             "https://investors.avaya.com/rss/presentation.aspx"
+             ))
+     nil nil))
+#+END_SRC
+** Emojify
+Emojify is an Emacs extension to display emojis. It can display github style emojis like :smile: or plain ascii ones like :).
+https://github.com/iqbalansari/emacs-emojify
+Resource intensive workaround. Probably obsolete with Emacs 29.
+#+BEGIN_SRC emacs-lisp
+  (use-package emojify
+    :custom
+    (emojify-display-style 'image)
+    :config
+    (global-emojify-mode))
+#+END_SRC
+** Engine-Mode
+Global minor mode that enables you to easily define search engines, bind them to keybindings, and query them from the comfort of your editor.
+https://github.com/hrs/engine-mode
+~Similar to Webjump but faster in handling~
+#+BEGIN_SRC emacs-lisp
+  (use-package engine-mode
+    :config
+    (engine/set-keymap-prefix (kbd "<f12> g"))
+    (defengine github
+      "https://github.com/search?ref=simplesearch&q=%s"
+      :keybinding "t"
+      :docstring "Searching Github")
+    (defengine google
+      "http://www.google.com/search?ie=utf-8&oe=utf-8&q=%s"
+      :keybinding "g"
+      :docstring "Searching Google")
+    (defengine rfcs
+      "https://datatracker.ietf.org/doc/rfc%s"
+      :keybinding "r"
+      :docstring "Searching RFCs")
+    (defengine stack-overflow
+      "https://stackoverflow.com/search?q=%s"
+      :keybinding "s"
+      :docstring "Searching Stack-Overflow")
+    (defengine wikipedia
+      "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
+      :keybinding "w"
+      :docstring "Searching Wikipedia")
+    (engine-mode))
+#+END_SRC
+** Evil-Nerd-Commenter
+A Nerd Commenter (VIM-Plugin) emulation, help you comment code efficiently.For example, you can press “99,ci” to comment out 99 lines.
+https://github.com/redguardtoo/evil-nerd-commenter
+~Despite the name is does not require evil mode~
+#+BEGIN_SRC emacs-lisp
+  (use-package evil-nerd-commenter
+    :bind
+    (("s-e c" . evilnc-copy-to-line)
+     ("s-e k" . evilnc-kill-to-line)
+     ("s-e q" . evilnc-quick-comment-or-uncomment-to-the-line)
+     ("s-e l" . evilnc-copy-and-comment-lines)
+     ("s-e o" . evilnc-copy-and-comment-operator)
+     ("s-e i" . evilnc-toggle-invert-comment-line-by-line)
+     ("s-e p" . evilnc-comment-or-uncomment-paragraphs)
+     ("s-e <SPC>" . evilnc-comment-or-uncomment-lines)
+     ("s-e r" . comment-or-uncomment-region)))
+#+END_SRC
+** Filetags
+Inspired by filetags (https://github.com/novoid/filetags) which manages filetags directly in the filename. By default tags are space seperated words seperated from the rest of the filename by -- e.g.
+https://github.com/DerBeutlin/filetags.el
+=Evaluate risk on SMB-Drives before using it.=
+#+BEGIN_SRC emacs-lisp
+  (use-package filetags)
+#+END_SRC
+** Fireplace
+A cozy fireplace
+https://github.com/johanvts/emacs-fireplace
+#+BEGIN_SRC emacs-lisp
+  (use-package fireplace)
+#+END_SRC
+** Folding
+A folding-editor-like minor mode.
+https://github.com/jaalto/project-emacs--folding-mode/
+#+BEGIN_SRC emacs-lisp
+  (use-package folding
+    :config
+    (folding-install-hooks)
+    (folding-add-to-marks-list 'org-mode ";{{{" ";}}}" nil t)
+    (folding-mode))
+#+END_SRC
+;{{{
+ example for org-mode
+;}}}
+** Free-Keys
+Show free bindings in current buffer.
+https://github.com/Fuco1/free-keys
+#+BEGIN_SRC emacs-lisp
+  (use-package free-keys
+    :bind
+    ("<f12> f" . free-keys)
+    :custom
+    (free-keys-modifiers '("" "C" "M" "C-M" "S" "C-S" "H" "C-H" "s" "s-H")))
+#+END_SRC
+** Git-Timemachine
+Use git-timemachine to browse historic versions of a file with p (previous) and n (next).
+https://gitlab.com/pidu/git-timemachine
+#+BEGIN_SRC emacs-lisp
+  (use-package git-timemachine) 
+#+END_SRC
+** Gnuplot
+This package allows running gnuplot files from within Emacs. It features:
+- Syntax highlighting and indentation for gnuplot scripts.
+- Pull-down menus for common gnuplot-related tasks.
+- Interactive gnuplot sessions using comint.
+- Context-sensitive completion.
+- Inline display of gnuplot plots.
+https://github.com/emacs-gnuplot/gnuplot
+=Required for org-babel to display gnuplot graphics. As of now, a manual fix is required on windows. NOT APPLYING THE FIX WILL RESULT EMACS TO FREEZE WHEN PLOTTING!=
+
+=In (defun gnuplot-send-string-to-gnuplot (string text) replace (comint-send-input) by (comint-send-input nil 1) then byte-compile-file gnuplot.el=
+#+BEGIN_SRC emacs-lisp
+  (use-package gnuplot) 
+#+END_SRC
+** Hercules
+An auto-magical, which-key based hydra banisher.
+https://github.com/wurosh/hercules/
+#+BEGIN_SRC emacs-lisp
+  (use-package hercules
+    :config
+    (hercules-def
+     :show-funs #'pdf-view-mode
+     :keymap 'pdf-view-mode-map
+     :flatten t
+     :transient t)
+    (global-set-key (kbd "<f7>") #'pdf-view-mode))
+#+END_SRC
+** Htmlize
+This package converts the buffer text and the associated decorations to HTML.
+https://github.com/hniksic/emacs-htmlize
+#+BEGIN_SRC emacs-lisp
+  (use-package htmlize)
+#+END_SRC
+** Hydra
+*** Global
+Tie related commands into a family of short bindings with a common prefix - a Hydra.
+https://github.com/abo-abo/hydra
+#+BEGIN_SRC emacs-lisp
+  (use-package hydra
+    :config
+    (global-set-key (kbd "s-o")))
+#+END_SRC
+*** Self-Defined Hydras
+**** Hydra-Org-Clock
+#+BEGIN_SRC emacs-lisp
+ (defhydra hydra-org-clock (:color amaranth :quit-key "q")
+    "    Org-Clock"
+    ("q" nil "quit" :column "Clock")
+    ("c" org-clock-cancel "cancel active clock" :column "Do")
+    ("d" org-clock-display "display")
+    ("e" org-clock-modify-effort-estimate "effort")
+    ("g" org-clock-goto "goto most recent clock")
+    ("i" org-clock-in "in")
+    ("o" org-clock-out "out")
+    ("r" org-clock-report "report"))
+#+END_SRC
+**** Hydra-Window
+#+BEGIN_SRC emacs-lisp
+ (defhydra hydra-window (:color amaranth)
+   "window"
+   ("<left>" windmove-left)
+   ("<down>" windmove-down)
+   ("<up>" windmove-up)
+   ("<right>" windmove-right)
+   ("V" (lambda ()
+          (interactive)
+          (split-window-right)
+          (windmove-right))
+    "Split-vertical")
+   ("X" (lambda ()
+          (interactive)
+          (split-window-below)
+          (windmove-down))
+    "Split-horzizontal")
+   ("M-<left>" shrink-window-horizontally)
+   ("M-<right>" enlarge-window-horizontally)
+   ("M-<down>" shrink-window)
+   ("M-<up>" enlarge-window)
+   ("a" ace-window "ace-select")
+   ("s" ace-swap-window "ace-swap")
+   ("d" ace-delete-window "ace-delete")
+   ("b" ivy-switch-buffer "ivy-switch-buffer")
+   ("o" delete-other-windows "delete-other" :color blue)
+   ("i" ace-maximize-window "ace-delete-other-windows" :color blue)
+   ("q" nil "cancel"))
+#+END_SRC
+**** Hydra-Ibuffer
+#+BEGIN_SRC emacs-lisp
+(defhydra hydra-ibuffer-main (:color pink :hint nil)
+  "
+ ^Navigation^ | ^Mark^        | ^Actions^        | ^View^
+-^----------^-+-^----^--------+-^-------^--------+-^----^-------
+  _k_:    ʌ   | _m_: mark     | _D_: delete      | _g_: refresh
+ _RET_: visit | _u_: unmark   | _S_: save        | _s_: sort
+  _j_:    v   | _*_: specific | _a_: all actions | _/_: filter
+-^----------^-+-^----^--------+-^-------^--------+-^----^-------
+"
+  ("j" ibuffer-forward-line)
+  ("RET" ibuffer-visit-buffer :color blue)
+  ("k" ibuffer-backward-line)
+
+  ("m" ibuffer-mark-forward)
+  ("u" ibuffer-unmark-forward)
+  ("*" hydra-ibuffer-mark/body :color blue)
+
+  ("D" ibuffer-do-delete)
+  ("S" ibuffer-do-save)
+  ("a" hydra-ibuffer-action/body :color blue)
+
+  ("g" ibuffer-update)
+  ("s" hydra-ibuffer-sort/body :color blue)
+  ("/" hydra-ibuffer-filter/body :color blue)
+
+  ("o" ibuffer-visit-buffer-other-window "other window" :color blue)
+  ("q" kill-this-buffer "quit ibuffer" :color blue)
+  ("." nil "toggle hydra" :color blue))
+
+(defhydra hydra-ibuffer-mark (:color teal :columns 5
+                              :after-exit (hydra-ibuffer-main/body))
+  "Mark"
+  ("*" ibuffer-unmark-all "unmark all")
+  ("M" ibuffer-mark-by-mode "mode")
+  ("m" ibuffer-mark-modified-buffers "modified")
+  ("u" ibuffer-mark-unsaved-buffers "unsaved")
+  ("s" ibuffer-mark-special-buffers "special")
+  ("r" ibuffer-mark-read-only-buffers "read-only")
+  ("/" ibuffer-mark-dired-buffers "dired")
+  ("e" ibuffer-mark-dissociated-buffers "dissociated")
+  ("h" ibuffer-mark-help-buffers "help")
+  ("z" ibuffer-mark-compressed-file-buffers "compressed")
+  ("b" hydra-ibuffer-main/body "back" :color blue))
+
+(defhydra hydra-ibuffer-action (:color teal :columns 4
+                                :after-exit
+                                (if (eq major-mode 'ibuffer-mode)
+                                    (hydra-ibuffer-main/body)))
+  "Action"
+  ("A" ibuffer-do-view "view")
+  ("E" ibuffer-do-eval "eval")
+  ("F" ibuffer-do-shell-command-file "shell-command-file")
+  ("I" ibuffer-do-query-replace-regexp "query-replace-regexp")
+  ("H" ibuffer-do-view-other-frame "view-other-frame")
+  ("N" ibuffer-do-shell-command-pipe-replace "shell-cmd-pipe-replace")
+  ("M" ibuffer-do-toggle-modified "toggle-modified")
+  ("O" ibuffer-do-occur "occur")
+  ("P" ibuffer-do-print "print")
+  ("Q" ibuffer-do-query-replace "query-replace")
+  ("R" ibuffer-do-rename-uniquely "rename-uniquely")
+  ("T" ibuffer-do-toggle-read-only "toggle-read-only")
+  ("U" ibuffer-do-replace-regexp "replace-regexp")
+  ("V" ibuffer-do-revert "revert")
+  ("W" ibuffer-do-view-and-eval "view-and-eval")
+  ("X" ibuffer-do-shell-command-pipe "shell-command-pipe")
+  ("b" nil "back"))
+
+(defhydra hydra-ibuffer-sort (:color amaranth :columns 3)
+  "Sort"
+  ("i" ibuffer-invert-sorting "invert")
+  ("a" ibuffer-do-sort-by-alphabetic "alphabetic")
+  ("v" ibuffer-do-sort-by-recency "recently used")
+  ("s" ibuffer-do-sort-by-size "size")
+  ("f" ibuffer-do-sort-by-filename/process "filename")
+  ("m" ibuffer-do-sort-by-major-mode "mode")
+  ("b" hydra-ibuffer-main/body "back" :color blue))
+
+(defhydra hydra-ibuffer-filter (:color amaranth :columns 4)
+  "Filter"
+  ("m" ibuffer-filter-by-used-mode "mode")
+  ("M" ibuffer-filter-by-derived-mode "derived mode")
+  ("n" ibuffer-filter-by-name "name")
+  ("c" ibuffer-filter-by-content "content")
+  ("e" ibuffer-filter-by-predicate "predicate")
+  ("f" ibuffer-filter-by-filename "filename")
+  (">" ibuffer-filter-by-size-gt "size")
+  ("<" ibuffer-filter-by-size-lt "size")
+  ("/" ibuffer-filter-disable "disable")
+  ("b" hydra-ibuffer-main/body "back" :color blue))
+(define-key ibuffer-mode-map "." 'hydra-ibuffer-main/body)
+#+END_SRC
+** Hyperbole
+Hyperbole, is like Markdown for hypertext. Hyperbole automatically recognizes dozens of common, pre-existing patterns in any buffer regardless of mode and can instantly activate them as hyperbuttons with a single key: email addresses, URLs, grep -n outputs, programming backtraces, sequences of Emacs keys, programming identifiers, Texinfo and Info cross-references, Org links, Markdown links and on and on. All you do is load Hyperbole and then your text comes to life with no extra effort or complex formatting.
+https://www.gnu.org/software/hyperbole/
+#+BEGIN_SRC emacs-lisp
+  (use-package hyperbole
+    :defer t)
+#+END_SRC
+** Info-Colors
+Extra colors for Emacs's Info-mode
+https://github.com/ubolonton/info-colors
+#+BEGIN_SRC emacs-lisp
+  (use-package info-colors
+    :hook
+    (Info-selection . info-colors-fontify-node))
+#+END_SRC
+** Ini-Mode
+Major mode for Windows-style ini files
+https://github.com/Lindydancer/ini-mode
+Unmaintained - currently no alternative
+#+BEGIN_SRC emacs-lisp
+  (use-package ini-mode
+    :mode
+    ("\\.ini\\'" . ini-mode))
+#+END_SRC
+** Kana
+Learn Japanese kana (仮名，五十音).
+https://github.com/chenyanming/kana/
+#+BEGIN_SRC emacs-lisp
+  (use-package kana)
+#+END_SRC
+** Latex-Extra
+Defines extra commands and keys for LaTeX-mode.
+https://github.com/Malabarba/latex-extra
+~Seems unmainted but currently no alternative~
+#+BEGIN_SRC emacs-lisp
+(let ((byte-compile-warnings '(not free-vars)))
+  (use-package latex-extra
+    :mode ("\\.tex\\'" . TeX-latex-mode)
+    :hook
+    (LaTeX-mode . latex-extra-mode)))
+#+END_SRC
+** Lisp-Butt-Mode
+Minor mode to make fat lisp butts appear slim.
+https://gitlab.com/marcowahl/lisp-butt-mode/
+=As of [2020-08-03 Mo] this packages causes "Invalid face reference" errors in org files.=
+#+BEGIN_SRC emacs-lisp
+  (use-package lisp-butt-mode
+    :demand t
+    :bind
+    ("<f12> b" . lisp-butt-global-mode)
+    :config
+    (lisp-butt-global-mode))
+#+END_SRC
+** Loccur
+Quickly navigate in a file. It is a minor mode for Emacs acting like occur but w/o creating a new window. It just hides all the text excepting lines containing matches.
+https://github.com/fourier/loccur
+#+BEGIN_SRC emacs-lisp
+  (use-package loccur
+    :bind
+    ("s-o l" . loccur))
+#+END_SRC
+** Mark-thing-at
+Tracks and creates bindings for region marking functions found in thingatpt.el.
+https://github.com/plandes/mark-thing-at/
+#+BEGIN_SRC emacs-lisp
+  (use-package mark-thing-at
+    :custom
+    (mark-thing-at-keymap-prefix "<f2>")
+    :bind
+    ("<f2> <f2>" . mark-word-thing)
+    :config
+    (mark-thing-at-mode))
+#+END_SRC
+** Multiple-Cursors
+Multiple cursors for Emacs. This is some pretty crazy functionality, so yes, there are kinks. Don't be afraid though, I've been using it since 2011 with great success and much merriment. https://github.com/magnars/multiple-cursors.el
+#+BEGIN_SRC emacs-lisp
+  (use-package multiple-cursors
+    :bind
+    (("H-m l" . mc/edit-lines)
+     ("H-m n" . mc/mark-next-like-this)
+     ("H-m p" . mc/mark-previous-like-this)
+     ("H-m a" . mc/mark-all-like-this)
+     ("H-m m" . mc/mark-more-like-this)
+     ("H-m i" . mc/insert-numbers)
+     ("H-m s" . mc/sort-regions)
+     ("H-m r" . mc/reverse-regions)
+     ("H-<mouse-1>" . mc/add-cursor-on-click)))
+#+END_SRC
+** Nov.el
+Epub viewer and Annotator.
+https://depp.brause.cc/nov.el/
+=Requires unzip system package=
+#+BEGIN_SRC emacs-lisp
+  (use-package nov
+    :mode (("\\.epub\\'" . nov-mode))
+    :config
+    (defun my-nov-font-setup ()
+      (face-remap-add-relative 'variable-pitch :family "Calibri" :height 1.3))
+    :hook
+    (nov-mode . my-nov-font-setup)
+    :custom
+    nov-text-width 80)
+#+END_SRC
+** Org
+*** Org-Bookmark-heading - Currently disabled due to native compile error
+Emacs bookmark support for org-mode
+https://github.com/alphapapa/org-bookmark-heading
+#+BEGIN_SRC emacs-lisp
+  (use-package org-bookmark-heading
+   :after org)
+#+END_SRC
+*** Custom Functions
+**** Copy-Internal-Link-to-Clipboard
+#+BEGIN_SRC emacs-lisp
+  (require 'anaphora)
+  (defun ph/org-extract-link-no-kill ()
+    "Extract the link location at point."
+    (when (org-in-regexp org-bracket-link-regexp 1)
+      (->
+       1
+       org-match-string-no-properties
+       org-link-unescape)))
+  (defun ph/org-extract-link ()
+    "Extract the link location at point and put it on the killring."
+    (interactive)
+    (awhen (ph/org-extract-link-no-kill)
+           (kill-new it)
+           (message "Copied \"%s\"." it)))
+  (define-key org-mode-map (kbd "C-c m") #'ph/org-extract-link)
+#+END_SRC
+*** Org-Superstar
+Prettify headings and plain lists in Org mode.
+https://github.com/integral-dw/org-superstar-mode
+#+BEGIN_SRC emacs-lisp
+  (use-package org-superstar
+    :hook
+    (org-mode . (lambda () (org-superstar-mode))))
+#+END_SRC
+*** Org-Fancy-Priorities
+Inspired by org-bullets, I created a minor mode that displays org priorities as custom strings. This mode does NOT change your files in any way, it only displays the priority part of a heading as your preferred string value.
+https://github.com/harrybournis/org-fancy-priorities
+#+BEGIN_SRC emacs-lisp
+  (use-package org-fancy-priorities
+    :custom
+    (org-fancy-priorities-list '("⚡" "⬆" "⬇" "☕"))
+    :hook
+    (org-mode . org-fancy-priorities-mode))
+#+END_SRC
+*** Org-Journal-Tags
+The package adds the org-journal: link type to Org Mode. When placed in an org-journal file, it serves as a “tag” that references one or many paragraphs of the journal or the entire section. These tags are aggregated in the database that can be queried in various ways.
+https://github.com/SqrtMinusOne/org-journal-tags/
+#+BEGIN_SRC emacs-lisp
+  (use-package org-journal-tags
+    :after org-journal)
+#+END_SRC
+*** Org-Kanban
+Kanban dynamic block for org-mode
+https://github.com/gizmomogwai/org-kanban
+#+BEGIN_SRC emacs-lisp
+  (use-package org-kanban)
+#+END_SRC
+*** Org-Mind-Map
+This is an emacs package that creates graphviz directed graphs from org-mode files.
+https://github.com/the-ted/org-mind-map
+#+BEGIN_SRC emacs-lisp
+  (use-package ox-org
+    :ensure nil)
+  (use-package org-mind-map)
+#+END_SRC
+*** Org-MRU-Clock
+The function org-mru-clock-in from this package will pre-fill your clock history with clocks from your agenda files (and other open org files) so you can clock in to your most recent clocks regardless of whether you just started Emacs or have had it running for decades. Tasks are sorted by recency, and uses completing-read for quick selection. This makes it a nice replacement for org-clock-in-last.
+https://github.com/unhammer/org-mru-clock
+#+BEGIN_SRC emacs-lisp
+  (use-package org-mru-clock
+    :bind  (
+    ("H-c i" . org-mru-clock-in)
+    ("H-c r" . org-mru-clock-select-recent-task))
+    :custom
+    (org-mru-clock-keep-formatting t)
+    (org-mru-clock-how-many 100)
+    (org-mru-clock-completing-read #'ivy-completing-read))
+#+END_SRC
+*** Org-Modern
+This package implements a “modern” style for your Org buffers using font locking and text properties. The package styles headlines, keywords, tables and source blocks.
+https://github.com/minad/org-modern
+#+BEGIN_SRC emacs-lisp
+  (use-package org-modern
+    :after org
+    :config
+    (global-org-modern-mode))
+#+END_SRC
+*** Org-Noter
+A synchronized, Org-mode, document annotator
+https://github.com/weirdNox/org-noter
+#+BEGIN_SRC emacs-lisp
+  (use-package org-noter)
+#+END_SRC
+*** Org-Outlook
+Org Mode Outlook Integration
+https://github.com/mattfidler/org-outlook.el
+=setx OUTLOOK4E C:\PROGRA~2\MICROS~1\root\Office16=
+#+BEGIN_SRC emacs-lisp
+  (use-package org-outlook)
+#+END_SRC
+*** Org-Pomodoro
+This adds very basic support for Pomodoro technique in Emacs' org-mode.
+https://github.com/marcinkoziej/org-pomodoro
+#+BEGIN_SRC emacs-lisp
+  (use-package org-pomodoro
+    :commands
+    (org-pomodoro))
+#+END_SRC
+*** Org-Protocol
+Intercept calls from emacsclient to trigger custom actions
+https://orgmode.org/worg/org-contrib/org-protocol.html
+#+BEGIN_SRC emacs-lisp
+  (use-package org-protocol
+     :custom
+     (org-capture-templates
+      '(("a" "Aufgabe" entry (file+headline "~/org/notes.org" "Aufgaben ohne Zuordnung")
+         "* ZU-ERLEDIGEN %?\n  %i\n  %a")
+        ("j" "Journal" entry (file+olp+datetree "~/org/journal.org")
+         "* ERLEDIGT %? \n:PROPERTIES:\n:Abgemeldet: Nein\n:Leistungsart:\n:END:\nCLOCK: %U--%U\n%i\n%a")
+        ("n" "Notiz" entry (file+headline "~/org/notes.org" "Notizen unsortiert")
+         "* %?")
+        ("p" "Protocol" entry (file+headline "~/org/notes.org" "Notizen unsortiert")
+         "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
+        ("L" "Protocol Link" entry (file+headline "~/org/notes.org" "Notizen unsortiert")
+         "* %? [[%:link][%:description]] \nCaptured On: %U")))
+    :ensure nil)
+#+END_SRC
+*** Org-Ref
+Citations, cross-references, indexes, glossaries and bibtex utilities for org-mode.
+https://github.com/jkitchin/org-ref
+=Needs further configuration!=
+#+BEGIN_SRC emacs-lisp
+(use-package org-ref)
+#+END_SRC
+*** Org-Rich-Yank
+Do you often yank source code into your org files, manually surrounding it in #+BEGIN_SRC blocks? This package will give you a new way of pasting that automatically surrounds the snippet in blocks, marked with the major mode of where the code came from, and adds a link to the source file after the block.
+https://github.com/unhammer/org-rich-yank
+#+BEGIN_SRC emacs-lisp
+(use-package org-rich-yank
+   :bind (
+   :map org-mode-map
+   ("C-M-y" . org-rich-yank)))
+#+END_SRC
+*** Org-Special-Block-Extras
+A unified interface for Emacs Org-mode block and link types
+https://github.com/alhassy/org-special-block-extras
+#+BEGIN_SRC emacs-lisp
+  (use-package org-special-block-extras
+    :hook
+    (org-mode . org-special-block-extras-mode))
+#+END_SRC
+*** Org-Sticky-Header
+This package displays in the header-line the Org heading for the node that’s at the top of the window. This way, if the heading for the text at the top of the window is beyond the top of the window, you don’t forget which heading the text belongs to. The display can be customized to show just the heading, the full outline path, or the full outline path in reverse.
+https://github.com/alphapapa/org-sticky-header
+#+BEGIN_SRC emacs-lisp
+  (use-package org-sticky-header
+    :hook
+    (org-mode . org-sticky-header-mode)
+    :custom 
+    (org-sticky-header-full-path 'full)
+    (org-sticky-header-prefix "📌: ")
+    (org-sticky-header-outline-path-separator " > ")
+    :config
+    (org-sticky-header-mode))
+#+END_SRC
+*** Org-Tree-Slides
+The main purpose of this elisp is to handle each tree in an org buffer as a slide by simple narrowing. This emacs lisp is a minor mode for Emacs Org-mode. Main features:
+- Live editable presentation
+- Fast switching of narrowing/widen
+- TODO pursuit with narrowing
+- Displaying the current number of slides in mode line
+- CONTENT view during a presentation
+- Slide-in effect
+- Slide header from org file’s header
+- Countdown timer
+https://github.com/takaxp/org-tree-slide
+#+BEGIN_SRC emacs-lisp
+  (use-package org-tree-slide
+    :bind
+    ("C-c i" . org-tree-to-indirect-buffer)
+    :custom
+    (org-tree-slide-breadcrumbs nil)
+    (org-tree-slide-header nil)
+    (org-tree-slide-slide-in-effect nil)
+    (org-tree-slide-cursor-init nil)
+    (org-tree-slide-modeline-display nil)
+    (org-tree-slide-never-touch-face nil))
+#+END_SRC
+*** Org-Web-Tools
+This file contains library functions and commands useful for retrieving web page content and processing it into Org-mode content.
+https://github.com/alphapapa/org-web-tools
+#+BEGIN_SRC emacs-lisp
+(use-package org-web-tools)
+#+END_SRC
+*** Ox-Reveal
+Reveal.js is a tool for creating good-looking HTML presentations, authored by Hakim El Hattab. For an example of a reveal.js presentation, see here.
+Org-Reveal exports your Org documents to reveal.js presentations. With Org-reveal, you can create beautiful presentations with 3D effects from simple but powerful Org contents.
+https://github.com/hexmode/ox-reveal
+#+BEGIN_SRC emacs-lisp
+  (use-package ox-reveal
+    :config
+    (defconst my-relative-directory-org-reveal-path "file:///C:/!Data/home/jlange/org/reveal.js/")
+    :custom
+    (org-reveal-root (symbol-value 'my-relative-directory-org-reveal-path)))
+#+END_SRC
+** Org-Contrib
+*** Org-Export-Groff
+Groff and PDF export
+https://orgmode.org/worg/exporters/ox-groff.html
+#+BEGIN_SRC emacs-lisp
+  (use-package ox-groff
+   :ensure org-plus-contrib)
+#+END_SRC
+*** Org-Latex
+LaTeX Back-End for Org Export Engine
+#+BEGIN_SRC emacs-lisp
+  (use-package ox-latex
+    :ensure org-plus-contrib
+    :custom
+    (org-latex-listings t))
+#+END_SRC
+*** Ox-Beamer
+Beamer Back-End for Org Export Engine
+=Allow for export=>beamer by placing #+latex_class: beamer in Org files=
+https://bitbucket.org/rivanvx/beamer/wiki/Home
+#+BEGIN_SRC emacs-lisp
+  (use-package ox-beamer
+    :ensure org-plus-contrib
+    :config
+    (progn
+      (add-to-list 'org-latex-classes
+                   '("beamer"
+                     "\\documentclass[presentation]{beamer}"
+                     ("\\section{%s}" . "\\section*{%s}")
+                     ("\\subsection{%s}" . "\\subsection*{%s}")
+                     ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))))
+#+END_SRC
+** Outshine
+Attempts to bring the look and feel of Org Mode to the world outside of the Org major-mode. It’s an extension of outline-minor-mode that should act as a replacement of Outline Mode. Just change all your calls to outline-minor-mode into outshine-mode.
+https://github.com/alphapapa/outshine
+#+BEGIN_SRC emacs-lisp
+  (use-package outshine
+    :hook
+    (prog-mode . outshine-mode))
+#+END_SRC
+** Projectile
+Projectile is a project interaction library.
+https://github.com/bbatsov/projectile
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :bind-keymap
+    ("C-s-p" . projectile-command-map))
+#+END_SRC
+** Region-Occurrences Highlighter
+Local minor mode that highlights occurrences of the current selected region.
+https://github.com/alvarogonzalezsotillo/region-occurrences-highlighter/
+#+BEGIN_SRC emacs-lisp
+  (use-package region-occurrences-highlighter
+    :hook
+    (prog-mode . region-occurrences-highlighter-mode))
+#+END_SRC
+** Show-Font-Mode
+Mode to display in the modeline the low-level font being used at point, along with its effective pixel dimensions or other properties. Also provided is show-font-mode-overlay, which will paint each on-screen font in a different tint. This should help debug unwanted fallback fonts.
+https://github.com/melissaboiko/show-font-mode
+#+BEGIN_SRC emacs-lisp
+  (use-package show-font-mode
+    :config
+    (show-font-mode))
+#+END_SRC
+** Side-Notes
+Quickly display your quick side notes in quick side window.
+https://github.com/rnkn/side-notes
+#+BEGIN_SRC emacs-lisp
+  (use-package side-notes
+    :bind
+    ("<f12> <SPC>" . side-notes-toggle-notes)
+    :custom
+    (side-notes-display-alist
+     '((side . left)
+       (window-width . 35)
+       (slot . 0))))
+#+END_SRC
+** Spray
+Speed reading mode
+https://github.com/emacsmirror/spray
+Unmaintained - currently no alternative
+#+BEGIN_SRC emacs-lisp
+  (use-package spray)
+#+END_SRC
+** Sysctl
+View and edit sysctl in a hierarchical structure in Emacs. Works on Linux, FreeBSD, OpenBSD, and macOS. Will work over TRAMP via SSH as well, including multiple hops.
+https://github.com/dantecatalfamo/sysctl.el
+#+BEGIN_SRC emacs-lisp
+  (use-package sysctl)
+#+END_SRC
+** Temporary-Persistent
+Easy way to switch temp buffers and keep them persistent.
+https://github.com/kostafey/temporary-persistent
+#+BEGIN_SRC emacs-lisp
+  (use-package temporary-persistent
+  :bind
+  ("<pause>" . my-timestamper-for-temp)
+  :custom
+  (temporary-persistent-buffer-name-template "temp.txt")
+  :config
+  (defun my-timestamper-for-temp ()
+    "Inserts current date+time"
+    (interactive)
+    (progn
+      (temporary-persistent-switch-buffer)
+      (end-of-buffer)
+      (newline)
+      (end-of-buffer)
+      (insert "\^L")
+      (newline)
+      (end-of-buffer)
+      (insert (format-time-string "%c" (current-time)))
+      (newline)
+      (end-of-buffer)
+      (recenter)
+      (raise-frame))))
+#+END_SRC
+** Trashed
+Open, view, browse, restore or permanently delete trashed files or directories in trash can with Dired-like look and feel.
+https://github.com/shingo256/trashed
+#+BEGIN_SRC emacs-lisp
+  (use-package trashed)
+#+END_SRC
+** TLDR - Too Long Didn't Read cheat.sh offline Repository
+TLDR Client (https://github.com/tldr-pages/tldr)
+=Run tldr-update-docs before first run, wait for the download/decompression=
+https://github.com/kuanyui/tldr.el
+#+BEGIN_SRC emacs-lisp
+  (use-package tldr
+    :commands
+    (tldr tldr-mode tldr-update-docs my-tldr-only-linux my-tldr-only-osx my-tldr-only-common+linux)
+    :custom
+    (tldr-enabled-categories '("common" "linux" "osx"))
+    :config
+    (defun my-tldr-only-osx ()
+      (interactive)
+      (let ((tldr-enabled-categories '("osx")))
+        (tldr)))
+    (defun my-tldr-only-linux ()
+      (interactive)
+      (let ((tldr-enabled-categories '("linux")))
+        (tldr)))
+    (defun my-tldr-only-common+linux ()
+      (interactive)
+      (let ((tldr-enabled-categories '("common" "linux")))
+        (tldr))))
+#+END_SRC
+** Treemacs
+*** Core
+Tree layout file explorer.
+https://github.com/Alexander-Miller/treemacs
+#+BEGIN_SRC emacs-lisp
+  (use-package treemacs
+    :bind
+    ("<f7>" . treemacs)
+    :custom
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-width 100))
+#+END_SRC
+*** Treemacs-Icons-Dired
+Treemacs icons for Dired.
+#+BEGIN_SRC emacs-lisp
+  (use-package treemacs-icons-dired
+    :after treemacs
+    :config
+    (dired-mode . treemacs-icons-dired-mode))
+#+END_SRC
+*** Treemacs-Projectile
+Projectile integration for treemacs
+#+BEGIN_SRC emacs-lisp
+  (use-package treemacs-projectile
+    :after treemacs)
+#+END_SRC
+** Tree-Sitter
+This is an Emacs Lisp binding for tree-sitter, an incremental parsing library.
+It aims to be the foundation for a new breed of Emacs packages that understand code structurally. For example:
+- Faster, fine-grained code highlighting.
+- More flexible code folding.
+- Structural editing (like Paredit, or even better) for non-Lisp code.
+- More informative indexing for imenu.
+https://github.com/emacs-tree-sitter/elisp-tree-sitter
+#+BEGIN_SRC emacs-lisp
+  (use-package tree-sitter
+    :hook
+    (tree-sitter-after-on . tree-sitter-hl-mode)
+    :config
+    (require 'tree-sitter-langs)
+    (global-tree-sitter-mode))
+  #+END_SRC
+** Vimish Fold
+Perform text folding like in Vim. Features:
+- folding of active regions
+- good visual feedback: it's obvious which part of text is folded
+- create folds from regions between {{{ }}} automatically (marks are customizable)
+- persistence by default: when you kill a buffer your folds don't disappear
+- persistence scales well, you can work on hundreds of files with lots of folds without adverse effects
+- it does not break indentation
+- folds can be toggled from folded state to unfolded and back very easily
+- quick navigation between existing folds
+- you can use mouse to unfold folds (good for beginners and not only for them)
+- for fans of the avy package: you can use avy to fold text with minimal number of key strokes!
+https://github.com/matsievskiysv/vimish-fold
+#+BEGIN_SRC emacs-lisp
+  (use-package vimish-fold
+    :bind
+    (("<f12> v f" . vimish-fold)
+     ("<f12> v d" . vimish-fold-delete)
+     ("<f12> v t" . vimish-fold-toggle)
+     ("<f12> v a" . vimish-fold-toggle-all))
+    :config
+    (vimish-fold-global-mode 1))
+#+END_SRC
+** Visual Bookmarks
+This package provides visible, buffer local, bookmarks and the ability to jump forward and backward to the next bookmark. It was created because I missed the bookmarks from M$ Visual Studio in GNU Emacs. I think they provide an easy way to navigate in a buffer. Features:
+- Auto remove bookmark after jump to it by bm-next or bm-previous
+- Cycle through bookmarks in all open buffers in LIFO order
+- Toggle bookmarks. Jump to next/previous bookmark.
+- Setting bookmarks based on a regexp. (Useful when searching logfiles.)
+- Mouse navigation.
+- Annotate bookmarks.
+- Different wrapping modes.
+- Different bookmarks styles, line-only, fringe-only or both.
+- Persistent bookmarks (buffer local), also in non-file buffers (info) and indirect buffers.
+- List bookmarks (in all buffers) in a separate buffer.
+- Cycle through bookmarks in all open buffers.
+https://github.com/joodland/bm
+#+BEGIN_SRC emacs-lisp
+  (use-package bm
+    :bind (("<f9> r" . bm-show-all) ;; reveal
+           ("<f9> n" . bm-next)
+           ("<f9> p" . bm-previous)
+           ("<f9> a" . bm-bookmark-annotate)
+           ("<f9> t" . bm-toggle)
+           ("<f9> s" . bm-save))
+    :custom
+    (bm-repository-file "~/.emacs.d/bm-repository")
+    (bm-restore-repository-on-load t)
+    (bm-cycle-all-buffers t)
+    (bm-highlight-style 'bm-highlight-only-fringe)
+    (bm-buffer-persistence t)
+    :hook
+    (find-file-hooks . bm-buffer-restore)
+    (after-init . bm-repository-load))
+#+END_SRC
+** Web Mode
+Autonomous Major-mode for editing web templates.
+https://web-mode.org/
+#+BEGIN_SRC emacs-lisp
+  (use-package web-mode
+    :config
+    (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.css\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.json\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.js[x]\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.php\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.xml\\'" . web-mode)))
+#+END_SRC
+** Writeroom-Mode
+Minor mode for Emacs that implements a distraction-free writing mode similar to the famous Writeroom editor for OS X.
+https://github.com/joostkremers/writeroom-mode
+#+BEGIN_SRC emacs-lisp
+  (use-package writeroom-mode
+    :bind
+    ("<f12> w" . writeroom-mode))
+#+END_SRC
+** WSD-mode
+Major-mode for Websequencediagrams.
+https://github.com/josteink/wsd-mode
+#+BEGIN_SRC emacs-lisp
+  (use-package wsd-mode
+  :commands
+  (wsd-mode))
+#+END_SRC
+** YaSnippet
+Template System geared for programmers
+https://github.com/joaotavora/yasnippet
+Optional used by LSP-Mode
+#+BEGIN_SRC emacs-lisp
+  (use-package yasnippet
+    :defer t
+    :custom
+    (yas-snippet-dirs '("~/.emacs.d/mysnippets"))
+    :delight
+    (yas-minor-mode " ✀")
+    :config
+    (yas-global-mode))
+#+END_SRC
+** Youtube-Download
+Frontend for youtube-dl
+https://github.com/emacsmirror/ytdl
+#+BEGIN_SRC emacs-lisp
+  (use-package ytdl
+    :defer t)
+#+END_SRC
+** ZPresent
+Zpresent.el is a package to present from within Emacs. The presentations are based on org files.
+https://hg.sr.ht/~zck/zpresent
+#+BEGIN_SRC emacs-lisp
+  (use-package zpresent
+    :commands zpresent)
+#+END_SRC
+** ZTree
+Ztree is a project dedicated to implementation of several text-tree applications inside Emacs. It consists of 2 subprojects: ztree-diff and ztree-dir (the basis of ztree-diff).
+- ztree-diff is a directory-diff tool for Emacs inspired by commercial tools like Beyond Compare or Araxis Merge. It supports showing the difference between two directories; calling Ediff for not matching files, copying between directories, deleting file/directories, hiding/showing equal files/directories.
+- ztree-dir is a simple text-mode directory tree
+https://github.com/fourier/ztree
+#+BEGIN_SRC emacs-lisp
+  (use-package ztree
+    :commands ztree-diff
+    :custom
+    (ztree-dir-move-focus t))
+#+END_SRC
+* WIP
+** Org-Recur
+#+BEGIN_SRC emacs-lisp
+  (use-package org-recur
+    :hook
+    (org-mode . org-recur-mode)
+    (org-agenda-mode . org-recur-agenda-mode)
+    :bind
+    (:map org-recur-mode-map ("C-c ö" . org-recur-finish))
+    (:map org-recur-agenda-mode-map ("C-c ö" . org-recur-finish))
+    :custom
+    (org-recur-finish-done t)
+    (org-recur-finish-archive t))
+#+END_SRC

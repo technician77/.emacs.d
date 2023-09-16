@@ -1,0 +1,1561 @@
+* Built-in Packages
+** Emacs
+Capslock is not reliably, especially in RDP-Session.
+Force Caps-Lock to send Capslock-Symbol instead of Capslock and redirect that Symbol to Hyper modifier.
+#+BEGIN_SRC emacs-lisp
+  (setq w32-enable-caps-lock nil)
+  (define-key function-key-map [capslock] 'event-apply-hyper-modifier)
+#+END_SRC
+** Ibuffer
+Now done by All-The-Icons-Ibuffer package 
+#+BEGIN_SRC emacs-lisp
+      ;Show sizes in human readable format
+      (ibuffer-formats
+       '((mark modified read-only " "
+               (name 18 18 :left :elide)
+               " "
+               (size-h 9 -1 :right)
+               " "
+               (mode 16 16 :left :elide)
+               " "
+               filename-and-process)))
+#+END_SRC
+** Ispell (Hunspell)
+Alternative configuration, if default is not working
+#+BEGIN_SRC emacs-lisp
+  :custom
+  (ispell-program-name (locate-file "hunspell" exec-path exec-suffixes 'file-executable-p))
+  (ispell-dictionary "deutsch")
+  (ispell-hunspell-dictionary-alist '(
+                                      ("american"
+                                       "[[:alpha:]]"
+                                       "[^[:alpha:]]"
+                                       "[']"
+                                       t
+                                       ("-d" "en_US" "-p" "/cygdrive/z/Tools/cygwin64/usr/share/hunspell/personal.us")
+                                       nil
+                                       utf-8)
+                                      ("british"
+                                       "[[:alpha:]]"
+                                       "[^[:alpha:]]"
+                                       "[']"
+                                       t
+                                       ("-d" "en_GB" "-p" "/cygdrive/z/Tools/cygwin64/usr/share/hunspell/personal.gb")
+                                       nil
+                                       utf-8)
+                                      ("deutsch"
+                                       "[[:alpha:]ÄÖÜéäöüß]"
+                                       "[^[:alpha:]ÄÖÜéäöüß]"
+                                       "[']"
+                                       t
+                                       ("-d" "de_DE" "-p" "/cygdrive/z/Tools/cygwin64/usr/share/hunspell/personal.de")
+                                       nil
+                                       utf-8)
+                                      ("francais"
+                                       "[[:alpha:]ÀÂÇÈÉÊËÎÏÔÙÛÜàâçèéêëîïôùûü]"
+                                       "[^[:alpha:]ÀÂÇÈÉÊËÎÏÔÙÛÜàâçèéêëîïôùûü]"
+                                       "[-']"
+                                       t
+                                       ("-d" "fr_FR" "-p" "/cygdrive/z/Tools/cygwin64/usr/share/hunspell/personal.fr")
+                                       nil
+                                       utf-8)
+                                      ))
+  :config
+  (setenv "DICTIONARY" "de_DE")
+#+END_SRC
+** Server
+The hook will cause "server-edit" to be called instead kill buffer, when pressing "C-x k"
+#+BEGIN_SRC emacs-lisp
+  (use-package server
+    :ensure nil
+    :hook
+    (server-switch . (lambda ()
+                       (when (current-local-map)
+                         (use-local-map (copy-keymap (current-local-map))))
+                       (when server-buffer-clients
+                         (local-set-key (kbd "C-x k") 'server-edit))))
+    :custom
+    (server-use-tcp t)
+    (server-name "main_server")
+    :config
+    (defun server-ensure-safe-dir (dir)
+      "Deactivate permission checks on server directory" t)
+    (server-start))
+#+END_SRC
+** Uniquify
+=Need to fix Ibuffer filter list before using it=
+Overrides default mechanism for making buffer names unique (using suffixes like <2>, <3> etc.) with a more sensible behaviour which use parts of the file names to make the buffer names distinguishable. For instance, buffers visiting “/u/mernst/tmp/Makefile" and "/usr/projects/zaphod/Makefile” would be named “Makefile|tmp” and “Makefile|zaphod”, respectively (instead of “Makefile” and “Makefile<2>”). Other buffer name styles are also available.
+#+BEGIN_SRC emacs-lisp
+  (use-package uniquify
+    :ensure nil
+    :custom
+    (uniquify-min-dir-content 999))
+#+END_SRC
+** LPR Printing
+=Drucker muss vorher in Windows freigegeben werden, geht nicht anders=
+#+BEGIN_SRC emacs-lisp
+  (use-package lpr
+    :ensure nil
+    :custom
+    (printer-name "//Office/Samsung_M2835DW")
+    (lpr-switches '("-w80"))
+#+END_SRC
+* External Packages
+** Ace-Window
+Replaced by to windmove
+#+BEGIN_SRC emacs-lisp
+  (use-package ace-window
+    :bind
+     ("<f7> s" . ace-swap-window)
+    :custom-face
+    (aw-leading-char-face ((nil :foreground "#ff8c00"))))
+#+END_SRC
+** AG - Silver Surfer
+Replaced by Ripgrep
+#+BEGIN_SRC emacs-lisp
+  (use-package ag)
+#+END_SRC
+** Annotate
+This package provides a minor mode annotate-mode, which can add annotations to arbitrary files without changing the files themselves. This is very useful for code reviews.
+https://github.com/bastibe/annotate.el
+=Incompatible with org-mode source code blocks=
+#+BEGIN_SRC emacs-lisp
+  (use-package annotate)
+#+END_SRC
+** Auto-Dictionary
+(Unmaintained and causes startup errors)
+#+BEGIN_SRC emacs-lisp
+  (use-package auto-dictionary
+    :hook
+    (flyspell-mode . auto-dictionary-mode)
+    :custom
+    (adict-language-list '(nil "en" "de"))
+    (ispell-program-name "aspell")
+    (ispell-extra-args '("--sug-mode=ultra")))
+#+END_SRC
+** Blimp+EImp
+(Not yet working with emacs 27, Development dead)
+#+BEGIN_SRC emacs-lisp
+  (use-package blimp
+   :hook
+   (image-mode . blimp-mode))
+  (use-package eimp
+   :custom
+   (eimp-enable-undo t))
+#+END_SRC
+** Cheatsheet
+Tool for creating your own Emacs cheatsheet.
+https://github.com/darksmile/cheatsheet
+Unmaintained
+#+BEGIN_SRC emacs-lisp
+  (use-package cheatsheet
+   :commands
+   (cheatsheet-show)
+   :config
+   (cheatsheet-add :group 'Misc
+                   :key "C-x u"
+                   :description "Show the undo-tree")
+   (cheatsheet-add :group 'Misc
+                   :key "M-y"
+                   :description "Counsel-yank-pop a.k.a. Show the kill-ring")
+   (cheatsheet-add :group 'Org
+                   :key "C-c c"
+                   :description "Org Capture")
+   (cheatsheet-add :group 'Org
+                   :key "C-c r"
+                   :description "Org sort"))
+#+END_SRC
+** Chronos
+Chronos provides multiple countdown / countup timers, updated every second, shown sorted by expiry time in the special buffer *chronos*.
+https://github.com/dxknight/chronos
+Unmaintained
+#+BEGIN_SRC emacs-lisp
+  (use-package chronos
+    :bind
+    (("<f8> i" . chronos-initialize)
+     ("<f8> a" . chronos-add-timer)
+     ("<f8> b" . my-chronos-bufferswitch))
+    :config
+    (defun my-chronos-bufferswitch ()
+      (interactive)
+      (switch-to-buffer "*chronos*")))
+#+END_SRC
+** Company
+*** Company-Auctex
+Not needed when using Auctex and Latex-LSP
+#+BEGIN_SRC emacs-lisp
+  (use-package company-auctex
+    :mode ("\\.tex\\'" . TeX-latex-mode)
+    :config
+    (company-auctex-init))
+#+END_SRC
+*** Company-Bibtex
+Outdated
+#+BEGIN_SRC emacs-lisp
+  (use-package company-bibtex
+    :mode ("\\.tex\\'" . TeX-latex-mode)
+    :custom
+    (company-bibtex-bibliography '("~/tex/bibliography.bib"))
+    :config
+    (add-to-list 'company-backends 'company-bibtex))
+#+END_SRC
+** Company-Auctex
+Not needed when using Latex-LSP
+#+BEGIN_SRC emacs-lisp
+  (use-package company-auctex
+    :after company
+    :hook
+    (LaTeX-mode . company-auctex-init)
+    :config
+    (add-to-list 'company-backends '(company-auctex)))
+#+END_SRC
+** Delight
+(Replaced by Minions)
+#+BEGIN_SRC emacs-lisp
+  (mapc
+   (lambda (package)
+     (if (not (package-installed-p package))
+         (progn
+           (package-refresh-contents)
+           (package-install package))))
+   '(use-package bind-key delight))
+  (require 'delight)
+  (global-auto-revert-mode " ⭯")
+  (abbrev-mode " \"")
+  (company-box-mode " ⌧")
+  (eldoc-mode " 🞧")
+  (flyspell-mode " 📎")
+  (visual-line-mode " ↹")
+  (overwrite-mode " ⌦")
+  (auto-fill-function " ▧" t)
+  (annotate-mode " 📔")
+  (command-log-mode " ⌘")
+  (company-mode " 🏭")
+  (counsel-mode " 🤞")
+  (drag-stuff-mode " ⇅")
+  (flycheck-mode " ✈")
+  (folding-mode " {}")
+  (ivy-mode " 🍂")
+  (reftex-mode " ※")
+  (latex-extra-mode " 👽")
+  (magic-latex-buffer " 🖐")
+  (eval-after-load 'org-indent '(delight 'org-indent-mode " ⏭" "org")) ; Delight is called outside of use-package because it doesn't work inside for this package.
+  (org-fancy-priorities-mode " ⚡")
+  (page-break-lines-mode " ⎘")
+  (projectile-mode " 📋")
+  (rainbow-mode " 🌈")
+  (synosaurus-mode " 🐊")
+  (undo-tree-mode " ⎌")
+  (vdiff-mode " ⚖")
+  (volatile-highlights-mode " 💡")
+  (which-key-mode " 🖮")
+#+END_SRC
+** ELDoc-Box
+Using Native Minibuffer instead
+Package to display ELDoc Documentation in Childframe instead of Minibuffer
+Currently text content is not completely shown in box.
+https://github.com/casouri/eldoc-box
+#+BEGIN_SRC emacs-lisp
+  (use-package eldoc-box
+    :hook
+    (eglot--managed-mode . eldoc-box-hover-mode))
+#+END_SRC
+** Eyebrowse
+(Saving and loading failed when last tested)
+A simple-minded way of managing window configs.
+https://depp.brause.cc/eyebrowse/
+#+BEGIN_SRC emacs-lisp
+  (use-package eyebrowse
+    :custom
+    (eyebrowse-keymap-prefix (kbd "<f8>")) ; Alternative [?\H-e]
+    (eyebrowse-wrap-around t)
+    (eyebrowse-switch-back-and-forth t)
+    :config
+    (eyebrowse-mode))
+#+END_SRC
+** Home-End
+Removed, because it breaks shift+End/Home marking
+#+BEGIN_SRC emacs-lisp
+  (use-package home-end
+    :bind
+    ("<home>" . home-end-home)
+    ("<end>" . home-end-end))
+#+END_SRC
+** IDO
+Replaced by Vertico/Counsel/Orderless
+*** Core (Internal)
+#+BEGIN_SRC emacs-lisp
+  (use-package ido
+    :custom
+    (ido-enable-flex-matching t)
+    (ido-everywhere t)
+    :config
+    (ido-mode))
+#+END_SRC
+*** Ido-vertical-mode
+#+BEGIN_SRC emacs-lisp
+  (use-package ido-vertical-mode
+    :custom
+    (ido-vertical-define-keys 'C-n-and-C-p-only)
+    :config
+    (ido-vertical-mode))
+#+END_SRC
+*** Ido-ubiquitous
+#+BEGIN_SRC emacs-lisp
+  (use-package ido-ubiquitous
+    :config
+    (ido-ubiquitous-mode))
+#+END_SRC
+** Ivy :🌲:
+Replaced by vertico/consult/orderless
+*** Ivy :Tree:
+**** Ivy-Mode
+Ivy-views are defined in Specific-Configuration
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy
+    :bind
+    (("s-v r" . ivy-resume)
+     ("s-v o" . ivy-occur)
+     ("<f7>" . ivy-switch-view)
+     (:map ivy-minibuffer-map ; bind in the ivy buffer only
+           ("M-<up>"   . ivy-previous-history-element)
+           ("M-<down>"   . ivy-next-history-element)))
+    :custom
+    (ivy-wrap t)
+    (ivy-use-virtual-buffers t)
+    (ivy-display-style 'fancy)
+    (ivy-count-format "(%d/%d) ")
+    (ivy-height 20)
+    (ivy-use-selectable-prompt t)
+    ;;  (ivy-completing-read-dynamic-collection t) Causes problems with Synosaurus.
+    (ivy-views (symbol-value 'my-ivy-views))
+    :config
+    (ivy-mode))
+#+END_SRC
+**** Ivy-Avy
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy-avy)
+#+END_SRC
+**** Ivy-Rich
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy-rich
+    :config
+    (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line)
+    (ivy-rich-mode))
+#+END_SRC
+**** Ivy-Views
+#+BEGIN_SRC emacs-lisp
+  (defconst my-ivy-views '(
+                           ("{} File1 + Temp + File2"
+                            (horz
+                             (file "c:/.../file1.org")
+                             (vert
+                              (buffer "*temp.txt*")
+                              (file "~/org/file2.org"))))
+                           ("{} File1 + File2"
+                            (horz
+                             (file "~/org/file1.org")
+                             (file "~/org/file2.org")
+                             ))
+                           ("{} File1 + File2 + File3"
+                            (horz
+                             (file "~/org/file1.org")
+                             (vert
+                              (file "~/org/file2.org")
+                              (file "~/org/file3.org"))))
+                           ))
+#+END_SRC
+**** TSA Capture Ivy
+#+BEGIN_SRC emacs-lisp
+(defun tsa/format-org-template (template)
+  "Format the entries of one of `org-capture-templates` for Ivy selection"
+  (cons (nth 1 template) (nth 0 template)))
+
+(defun tsa/ivy-select-org-capture-template ()
+  "Select an org-capture-template with ivy"
+  (interactive)  
+  (ivy-read "Capture template: "
+	    (mapcar 'tsa/format-org-template org-capture-templates)
+	    :history 'counsel-org-capture-templates-history
+	    :require-match t
+	    :caller 'tsa/ivy-select-org-capture-template
+	    :action (lambda (template)
+		      (let ((target (cdr template)))
+			(org-capture nil target)))))
+#+END_SRC
+*** Ivy-Hydra
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy-hydra
+    :after ivy
+    :bind ((
+            :map ivy-minibuffer-map
+                 ("C-o" . hydra-ivy/body)
+                 ("M-o" . ivy-dispatching-done-hydra))))
+#+END_SRC
+*** Swiper
+To select buffers in Swiper-Multi use C-M-m to select buffers.
+#+BEGIN_SRC emacs-lisp
+  (use-package swiper
+    :bind
+    (("C-f" . swiper)
+     ("M-s-f a" . swiper-all)
+     ("M-s-f m" . swiper-multi)
+     ("M-s-f s" . swiper-isearch)
+     ("M-s-f r" . swiper-backward)
+     (:map swiper-map
+           ("C-#"   . swiper-avy)))
+    :custom
+    (swiper-goto-start-of-match t)
+    (swiper-action-recenter t))
+#+END_SRC
+*** LSP :Tree:
+**** LSP-Ivy
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-ivy)
+#+End_SRC
+*** Prescient :Tree:
+**** Ivy-Prescient Backend
+#+BEGIN_SRC emacs-lisp
+  (use-package ivy-prescient
+   :after (prescient ivy)
+   :custom
+   (ivy-prescient-enable-filtering t)
+   (ivy-prescient-enable-sorting t)
+   :config
+   (ivy-prescient-mode))
+#+END_SRC
+*** Counsel :Tree:
+**** Counsel-Projectile
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel-projectile
+    :commands
+    (counsel-projectile counsel-projectile-mode))
+#+END_SRC
+**** Counsel-Mode
+Counsel-locate-cmd-es uses es.exe which requires the Everything GUI-Version to run in the background.
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel
+    :bind
+    (("<f1> u" . counsel-unicode-char)
+     ("<f1> g" . counsel-git) ; was describe-gnu-project
+     ("<f1> y" . counsel-yank-pop)
+     ("<f1> <SPC>" . counsel-mark-ring)
+     ("<f1> <f9>" . counsel-locate)
+     ("<f9> c" . counsel-bookmark))
+    :custom
+    (counsel-locate-cmd 'counsel-locate-cmd-es)
+    :config
+    (counsel-mode))
+#+END_SRC
+**** Counsel-Firefox-Data
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel-ffdata
+    :bind
+    ("<f12> f f" . counsel-ffdata-firefox-bookmarks)
+    ("<f12> f h" . counsel-ffdata-firefox-history))
+#+END_SRC
+**** Counsel-etags
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel-etags
+    :bind
+    (("s-t ." . counsel-etags-find-tag-at-point)
+     ("s-t g" . counsel-etags-grep-symbol-at-point)
+     ("s-t f" . counsel-etags-find-tag)))
+#+END_SRC
+**** Counsel-Org-Clock
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel-org-clock
+    :bind
+    (("H-c h" . counsel-org-clock-history)
+     ("H-c c" . counsel-org-clock-context)))
+#+END_SRC
+**** Counsel-BBDB
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel-bbdb)
+#+END_SRC
+*** All-The-Icons :Tree:
+**** All-The-Icons-Ivy
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons-ivy
+    :config
+    (all-the-icons-ivy-setup))
+#+END_SRC
+**** All-The-Icons-Ivy-Rich
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons-ivy-rich
+    :config
+    (all-the-icons-ivy-rich-mode))
+#+END_SRC
+** Latex-Preview-Pane
+Minor mode for Emacs that enables you to preview your LaTeX files directly in Emacs. It supports PDF previews, your choice of pdflatex or xelatex, and it highlights errors in your LaTeX buffer.
+https://github.com/jsinglet/latex-preview-pane
+~Seems unmaintained and most likely unneeded when using PDF-Tools~
+#+BEGIN_SRC emacs-lisp
+  (use-package latex-preview-pane
+    :hook
+    (LaTeX-mode . latex-preview-pane-mode))
+#+END_SRC
+** Linum-relative
+Display relative line numbers.
+https://github.com/coldnew/linum-relative
+Feature now built-in
+#+BEGIN_SRC emacs-lisp
+  (use-package linum-relative
+    :bind
+    ("<f12> l" . linum-relative-toggle)
+    :custom
+    (linum-relative-backend 'display-line-numbers-mode))
+#+END_SRC
+** Logview
+Does not work with logs I use, like syslog.
+#+BEGIN_SRC emacs-lisp
+  (use-package logview
+    :config
+    (add-to-list 'auto-mode-alist '("\\log.txt\\'" . logview-mode))
+    (add-to-list 'auto-mode-alist '("\\.log\\'" . logview-mode))
+    (setq logview-additional-level-mappings
+          (quote (("myLevels" . ((error "ERROR")(warning "WARNING")(information "INFO")(debug "DEBUG")(trace "TRACE"))))))
+    (setq logview-additional-timestamp-formats
+          (quote (("xxx" (regexp . "[0-9]\\{4\\}-[01][0-9]-[0-3][0-9] [012][0-9]:[0-5][0-9]:[0-9][0-9],[0-9]\\{3\\}") (aliases))))))
+#+END_SRC
+** LSP :Tree:
+Replaced by Eglot, since it's more native
+*** LSP-Mode
+Language Server Protocol Support
+https://github.com/emacs-lsp/lsp-mode
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-mode
+    :hook
+    (lsp-mode . lsp-enable-which-key-integration)
+    :custom
+    (lsp-print-io nil) ; set to true for debugging purposes
+    :commands lsp)
+#+End_SRC
+*** LSP-Mode Corfu-Fix
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-mode
+    :init
+    (defun corfu-lsp-setup ()                       ;fix for corfu
+     (setq-local completion-styles '(orderless)     ;fix for corfu
+              completion-category-defaults nil))    ;fix for corfu
+    :hook
+    (lsp-mode-hook . corfu-lsp-setup)               ;fix for corfu
+    :custom
+    (lsp-completion-provider :none))                ;fix for corfu
+#+End_SRC
+*** LSP-UI
+Higher level UI modules for lsp-mode, like flycheck support and code lenses.
+https://emacs-lsp.github.io/lsp-ui/
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-ui
+    :hook
+    (lsp-mode . lsp-ui-mode)
+    :commands lsp-ui-mode)
+#+End_SRC
+*** LSP-Latex
+LSP-mode client for LaTeX
+https://github.com/ROCKTAKEY/lsp-latex
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-latex
+    :demand t
+    :hook
+    (LaTeX-mode . lsp)
+    (TeX-mode . lsp)
+    (bibtex-mode . lsp)
+    :custom
+    (lsp-latex-texlab-executable-argument-list nil)) ; set to '("-vvvv") for debugging purposes
+	#+End_SRC
+*** LSP-Consult
+Extra information for LSP-Mode using Consult
+https://github.com/gagbo/consult-lsp
+#+BEGIN_SRC emacs-lisp
+  (use-package consult-lsp
+    :config
+    (consult-lsp-marginalia-mode))
+#+End_SRC
+#+End_SRC
+** Manage Minor Mode
+Manage your minor-mode on the dedicated interface buffer.
+https://github.com/emacsorphanage/manage-minor-mode/
+Replaced by Minions Mode
+#+BEGIN_SRC emacs-lisp
+(use-package manage-minor-mode
+  :commands
+  (manage-minor-mode))
+#+END_SRC
+** Moody
+(Replaced by doom-modeline)
+#+BEGIN_SRC emacs-lisp
+  (use-package moody
+    :custom   
+    (x-underline-at-descent-line t)
+    :config
+    (moody-replace-mode-line-buffer-identification)
+    (moody-replace-vc-mode))
+#+END_SRC
+** Modus Vivendi Theme
+Now a part of emacs distribution
+#+BEGIN_SRC emacs-lisp
+  (use-package modus-themes
+  :custom
+  (modus-vivendi-theme-section-headings t))
+#+END_SRC
+** All-the-icons :Tree:
+Replaced by Nerd-icons
+*** All-the-icons-dired
+All the icons for dired
+https://github.com/jtbm37/all-the-icons-dired
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons-dired
+    :hook
+    (dired-mode . all-the-icons-dired-mode))
+#+END_SRC
+*** All-The-Icons-Ibuffer
+All the icons for ibuffer
+https://github.com/seagle0128/all-the-icons-ibuffer
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons-ibuffer
+    :init
+    ;Fix icon bug
+    :custom
+    (all-the-icons-ibuffer-human-readable-size t)
+    (all-the-icons-ibuffer-formats
+     `((mark modified read-only locked " " ,
+             (if (and (display-graphic-p) all-the-icons-ibuffer-icon) '(icon 2 2 :left :elide) "") ,
+             (if (and (display-graphic-p) all-the-icons-ibuffer-icon) (propertize " " 'display `(space :align-to 8)) "") (name 18 18 :left :elide) " " (size-h 9 -1 :right) " " (mode+ 16 16 :left :elide) " " filename-and-process+)
+       (mark " " (name 16 -1) " " filename)))
+    :hook
+    (ibuffer-mode . all-the-icons-ibuffer-mode)
+    :config
+    ;must be setq to get loading order right
+    (setq ibuffer-formats all-the-icons-ibuffer-formats)
+    (all-the-icons-ibuffer-mode))
+#+END_SRC
+*** All-The-Icons-Completions
+Add icons to completion candidates using the built in completion metadata functions.
+https://github.com/iyefrat/all-the-icons-completion
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons-completion
+    :config
+    (all-the-icons-completion-mode))
+#+END_SRC
+** Nlinum
+(Replaced by display-line-numbers)
+#+BEGIN_SRC emacs-lisp
+  (use-package nlinum
+    :bind
+    ("H-n" . nlinum-mode))
+#+END_SRC
+** Nlinum-relative
+(Replaced by display-line-numbers relative)
+#+BEGIN_SRC emacs-lisp
+  (use-package nlinum-relative
+    :bind
+    ("C-H-n" . nlinum-relative-toggle)
+    :config
+    (setq nlinum-relative-redisplay-delay 0))
+#+END_SRC
+** Org
+*** Org-Present
+(When returning from the presentation leading stars are missing, turning off does not work by calling the mode again)
+This is meant to be an extremely minimalist presentation tool for Emacs org-mode. Simply layout your presentation with each slide under a top-level header, start the minor mode with 'org-present', and page through each slide with left/right keys.
+https://github.com/rlister/org-present
+#+BEGIN_SRC emacs-lisp
+  (use-package org-present)
+#+END_SRC
+*** Org - Vcard
+(Use is limited, problems with some fields)
+#+BEGIN_SRC emacs-lisp
+  (use-package org-vcard
+    :custom
+    (org-vcard-default-vcard-21-character-set (quote utf-8))
+    (org-vcard-active-language "de")
+    (org-vcard-default-version "2.1")
+    (org-vcard-default-import-file "~/test/org-vcard-import.vcf")
+    (org-vcard-default-export-file "~/test/org-vcard-export.vcf")
+    (org-vcard-include-import-unknowns t))
+#+END_SRC
+*** Org-Custom-Functions
+**** Org-Subtree-to-indirect-buffer
+#+BEGIN_SRC emacs-lisp
+  (defun my-org-subtree-to-indirect-buffer ()
+    (interactive)
+    (let ((ind-buf (concat (buffer-name) "-<N>👬")))
+      (if (get-buffer ind-buf)
+          (kill-buffer ind-buf))
+      (clone-indirect-buffer-other-window ind-buf t)
+      (org-narrow-to-subtree)
+      (switch-to-buffer ind-buf)))
+#+END_SRC
+** OX-TWBS
+(Unmaintained)
+Requires HTMLize, although it has not dependecy on it.
+#+BEGIN_SRC emacs-lisp
+  (use-package ox-twbs)
+#+END_SRC
+** Parrot
+Rotatation for pre-defined words.
+https://github.com/dp12/parrot
+Replaced by Cycle at Point
+#+BEGIN_SRC emacs-lisp
+  (use-package parrot
+    :bind
+    ("M-s-p" . parrot-rotate-prev-word-at-point)
+    ("M-s-n" . parrot-rotate-next-word-at-point)
+    :config
+    (parrot-mode))
+#+END_SRC
+** Peep-Dired
+Minor mode that can be enabled from a dired buffer. Once enabled it will show the file from point in the other window.
+https://github.com/asok/peep-dired
+Unmaintained
+#+BEGIN_SRC emacs-lisp
+  (use-package peep-dired
+    :custom
+    (peep-dired-cleanup-on-disable t))
+#+END_SRC
+** Popwin
+Unmaintained and not needed anymore.
+#+BEGIN_SRC emacs-lisp
+(use-package popwin
+  :custom
+  (display-buffer-function 'popwin:display-buffer)
+  (popwin:special-display-config
+    '(("*Help*" :dedicated t :position right :stick t :noselect t :width 0.3)
+      ("*Messages*" :noselect t)
+      ("*Apropos*" :noselect t)
+      ("*Backtrace*" :noselect t)
+      ("*Occur*" :noselect t)
+      ("*magit-commit*" :noselect t)
+      ("*magit-diff*" :noselect t)
+      ("*magit-edit-log*" :noselect t)
+      ("*shell*")
+      ("*Compile-Log*" :stick t))))
+#+END_SRC
+** Powerline
+(Replaced by Doom-Modeline)
+*** Celestial-Mode-Line
+Add this to Powerline and replace face and orientation:
+(powerline-raw celestial-mode-line-string faceX 'x)
+*** Powerline Theme-Function Definition
+#+BEGIN_SRC emacs-lisp
+    (defun my-powerline-theme ()
+      "Setup my powerline theme"
+      (interactive)
+      (setq-default mode-line-format
+                    '("%e"
+                      minions-mode-line-modes
+                      (:eval
+                       (let* ((active (powerline-selected-window-active))
+                              (mode-line-buffer-id (if active 'mode-line-buffer-id 'mode-line-buffer-id-inactive))
+                              (mode-line (if active 'mode-line 'mode-line-inactive))
+                              (face0 (if active 'powerline-active0 'powerline-inactive0))
+                              (face1 (if active 'powerline-active1 'powerline-inactive1))
+                              (face2 (if active 'powerline-active2 'powerline-inactive2))
+                              (separator-left (intern (format "powerline-%s-%s"
+                                                              (powerline-current-separator)
+                                                              (car powerline-default-separator-dir))))
+                              (separator-right (intern (format "powerline-%s-%s"
+                                                               (powerline-current-separator)
+                                                               (cdr powerline-default-separator-dir))))
+                              (lhs (list
+                                    (funcall separator-left face0 face1)
+                                    (powerline-raw "%*" face1 'l)
+                                    (when powerline-display-buffer-size
+                                      (powerline-buffer-size face0 'l))
+                                    (powerline-raw " " face1)
+                                    (funcall separator-left face1 face2)
+                                    (when powerline-display-mule-info
+                                      (powerline-raw mode-line-mule-info face2 'l))
+                                    (powerline-raw " " face2)
+                                    (funcall separator-left face2 face0)
+                                    (powerline-buffer-id `(mode-line-buffer-id ,face0))
+                                    (when (and (boundp 'which-func-mode) which-func-mode)
+                                      (powerline-raw which-func-format face0 'l))
+                                    (powerline-raw " " face0)
+                                    (funcall separator-left face0 face2)
+                                    (when (and (boundp 'erc-track-minor-mode) erc-track-minor-mode)
+                                      (powerline-raw erc-modified-channels-object face2 'l))
+                                    (when (and (boundp 'evil-mode) evil-mode)
+                                      (powerline-raw evil-mode-line-tag face2 'l))
+                                    (powerline-raw " " face2)
+                                    (funcall separator-left face2 face1)
+                                    (powerline-process face1)
+                                    (powerline-raw " " face1)
+                                    (funcall separator-left face1 face2)
+                                    (powerline-raw " " face2)
+                                    (powerline-vc face2 'l)
+                                    (funcall separator-left face2 face0)
+                                    (powerline-raw mode-line-position face0 'l)
+                                    (powerline-raw " " face0)
+                                    (funcall separator-left face0 face2)
+                                    ))
+                              (rhs (list
+                                    (funcall separator-right face2 face1)
+                                    (powerline-raw " " face1)
+                                    (powerline-raw (symbol-name buffer-file-coding-system) face1 'r)
+                                    (funcall separator-right face1 face0)
+                                    (powerline-raw celestial-mode-line-string face0 'r)
+                                    (powerline-raw mode-line-misc-info face0 'r)
+                                    (funcall separator-right mode-line face1)
+                                    )))
+                         (concat (powerline-render lhs)
+                                 (powerline-fill face2 (powerline-width rhs))
+                                 (powerline-render rhs)))))))
+#+END_SRC
+*** Powerline Main-Configuration
+#+BEGIN_SRC emacs-lisp
+  (use-package powerline
+    :custom-face
+    (powerline-active1 ((nil :inherit mode-line :background "#ff8c00" :foreground "black")))
+    (powerline-active2 ((nil :inherit mode-line :background "#666666" :foreground "white")))
+    (powerline-inactive1 ((nil :inherit mode-line-inactive :background "#1c1c1c" :foreground "#333333")))
+    (powerline-inactive2 ((nil :inherit mode-line-inactive :background "#333333" :foreground "#1c1c1c")))
+    :custom
+    (powerline-display-buffer-size nil)
+    (powerline-gui-use-vcs-glyph t)
+    :config
+    (my-powerline-theme))
+#+END_SRC
+*** Evil-Mode
+Add this to Powerline and replace face and orientation:
+(when (and (boundp 'evil-mode) evil-mode)
+(powerline-raw evil-mode-line-tag facex 'x))
+** Prescient :Tree:
+Simple but effective sorting by Frecency (Heuristic that combines the frequency and recency into a single measure.)
+https://github.com/raxod502/prescient.el
+*** Core
+#+BEGIN_SRC emacs-lisp
+  (use-package prescient
+    :after (selectrum)
+    :custom
+    (prescient-save-file "~/.emacs.d/prescient-save.el")
+    :config
+    (prescient-persist-mode))
+#+END_SRC
+*** Selectrum Backend
+#+BEGIN_SRC emacs-lisp
+  (use-package selectrum-prescient
+    :after (prescient selectrum)
+    :config
+    (selectrum-prescient-mode))
+#+END_SRC
+*** Company Backend
+#+BEGIN_SRC emacs-lisp
+  (use-package company-prescient
+    :after (prescient company)
+    :config
+    (company-prescient-mode))
+#+END_SRC
+** Rip-Grep
+Frontend to Ripgrep
+https://github.com/dajva/rg.el
+=Can use WGrep, turn off evil when switching to it.=
+Replaced by Phi-Grep due to running natively.
+#+BEGIN_SRC emacs-lisp
+  (use-package rg
+    :bind
+    ("s-R" . rg-menu))
+#+END_SRC
+** Selectrum Orderless Version
+Alternative to Vertico
+#+BEGIN_SRC emacs-lisp
+  (use-package selectrum
+    :custom
+    (completion-styles '(orderless))
+    (orderless-skip-highlighting (lambda () selectrum-is-active))
+    (selectrum-highlight-candidates-function #'orderless-highlight-matches)
+    :config
+    (selectrum-mode))
+#+END_SRC
+** Selectrum Prescient Version
+Selectrum is a better solution for incremental narrowing in Emacs, replacing Helm, Ivy, and Ido.
+https://github.com/raxod502/selectrum
+#+BEGIN_SRC emacs-lisp
+  (use-package selectrum
+    :config
+    (selectrum-mode))
+#+END_SRC
+** SR-Speedbar
+(Unmaintained, caused visual glitches)
+#+BEGIN_SRC emacs-lisp
+  (use-package sr-speedbar
+  :init
+  (setq sr-speedbar-width 40)
+  (setq sr-speedbar-width-x 40)
+  (setq sr-speedbar-skip-other-window-p t)
+  (setq sr-speedbar-right-side nil))
+#+END_SRC
+** Tabbar
+(Can't handle large buffercounts, ugly, ineffective)
+#+BEGIN_SRC emacs-lisp
+  (use-package tabbar
+    :config
+    (setq tabbar-buffer-groups-function 'tabbar-buffer-groups)
+    (setq tabbar-background-color "black")
+    (setq tabbar-use-images nil)
+    (setq tabbar-default ((t (:background "black" :foreground "white" :height 1.0))))
+    (setq tabbar-highlight ((t (:underline "dark orange"))))
+    (setq tabbar-modified ((t (:inherit tabbar-default :foreground "red" :box (:line-width 1 :color "white" :style released-button)))))
+    (setq tabbar-selected ((t (:inherit tabbar-default :foreground "dark orange" :box (:line-width 1 :color "white" :style pressed-button)))))
+    (setq tabbar-selected-modified ((t (:inherit tabbar-default :foreground "red" :box (:line-width 1 :color "white" :style released-button)))))
+    (tabbar-mwheel-mode -1)
+    (tabbar-mode)
+    (defun tabbar-buffer-groups ()
+      "Return the list of group names the current buffer belongs to.
+  This function is a custom function for tabbar-mode's tabbar-buffer-groups.
+  This function group all buffers into 3 groups:
+  Those Dired, those user buffer, and those emacs buffer.
+  Emacs buffer are those starting with “*”."
+      (list
+       (cond
+        ((string-equal "*Packages*" (buffer-name))
+         "Packages"
+         )
+        ((string-equal "*" (substring (buffer-name) 0 1))
+         "Emacs Buffer"
+         )
+        ((eq major-mode 'dired-mode)
+         "Dired"
+         )
+        (t
+         "User Buffer"
+         )
+        ))))
+#+END_SRC
+** Telephone-Line
+(Replaced by doom-modeline)
+#+BEGIN_SRC emacs-lisp
+  (use-package telephone-line
+    :config
+    (setq telephone-line-lhs '(
+                               (accent telephone-line-major-mode-segment)
+                               (nil telephone-line-vc-segment)
+                               (accent telephone-line-minor-mode-segment)
+                               (nil telephone-line-nyan-segment)
+                               ))
+    (setq telephone-line-rhs '(
+                               (accent telephone-line-misc-info-segment)
+                               (nil telephone-line-buffer-segment)
+                               (accent telephone-line-airline-position-segment)))
+    (telephone-line-mode))
+#+END_SRC
+** Undo-Propose
+https://github.com/jackkamm/undo-propose-el
+Native Undo is sufficient
+#+BEGIN_SRC emacs-lisp
+  (use-package undo-propose
+    :bind 
+    (("C-c _" . undo-propose)))
+#+END_SRC
+** Use-Package-Ensure-System-Package
+Recommended:
+(setq async-shell-command-buffer 'new-buffer)
+Example:
+:ensure-system-package ((mingw-w64-x86_64-hunspell . "pacman -S --needed mingw-w64-x86_64-hunspell") (mingw-w64-x86_64-hunspell-en . "pacman -S --needed mingw-w64-x86_64-hunspell-en"))
+Problem:
+Far too slow on windows, checks availability evertime emacs is opened.
+*** Use-package-ensure-system-package
+#+BEGIN_SRC emacs-lisp
+  (use-package use-package-ensure-system-package
+  :ensure nil
+  :demand t
+  :bind
+  ("<f12> s" . use-package-ensure-system-package-upda1te-custom-packages)
+  :ensure-system-package ((fish . "pacman -S --needed fish")
+                          (mingw-w64-x86_64-hunspell . "pacman -S --needed mingw-w64-x86_64-hunspell")
+                          (mingw-w64-x86_64-hunspell-en . "pacman -S --needed mingw-w64-x86_64-hunspell-en"))
+  :custom use-package-ensure-system-package--custom-packages '("pacman -Syuu"))
+#+END_SRC
+*** Sentinel to avoid locked shells
+#+BEGIN_SRC emacs-lisp
+  (defun add-process-sentinel (sentinel &optional process)
+  "Add SENTINEL to PROCESS.
+PROCESS defaults to the process of the current buffer.
+Use this function with care.
+If there is already a process sentinel SENTINEL is used as after-advice.
+That can fail if the process sentinel is reset by some other function."
+  (unless process
+    (setq process (get-buffer-process (current-buffer))))
+  (let ((old (process-sentinel process)))
+    (cond
+     ((symbolp old)
+      (advice-add old :after sentinel))
+     ((null old)
+      (set-process-sentinel process sentinel))
+     (t (warn "Cannot set sentinel %S for process %S." sentinel process)))))
+
+(defun my-shell-mode-hook ()
+  "Custom `shell-mode' behaviours."
+  ;; Kill the buffer when the shell process exits.
+  (add-process-sentinel
+   (lambda (process signal)
+     (and (memq (process-status process) '(exit signal))
+          (buffer-live-p (process-buffer process))
+          (kill-buffer (process-buffer process))))))
+
+(add-hook 'shell-mode-hook 'my-shell-mode-hook)
+#+END_SRC
+** Volatile-highlights
+(Unmaintained, Replaced by goggles)
+Minor mode for visual feedback on some operations.
+https://github.com/k-talo/volatile-highlights.el
+#+BEGIN_SRC emacs-lisp
+  (use-package volatile-highlights
+    :config
+    (volatile-highlights-mode)
+    (vhl/define-extension 'undo-tree 'undo-tree-yank 'undo-tree-move)
+    (vhl/install-extension 'undo-tree))
+#+END_SRC
+** W32-Browser
+Run Windows application associated with a file.
+https://www.emacswiki.org/emacs/w32-browser.el
+Unmaintained
+#+BEGIN_SRC emacs-lisp
+    (use-package w32-browser
+    :bind
+    (
+    :map dired-mode-map
+    ("b" . dired-w32-browser)
+    ("z" . dired-w32explore)))
+#+END_SRC
+** W32-Browser-DLGOpen
+(Breaks CLI experience)
+#+BEGIN_SRC emacs-lisp
+  (use-package w32browser-dlgopen)
+#+END_SRC
+** WGrep
+Allows you to edit a grep buffer and apply those changes to the file buffer like sed interactively.
+https://github.com/mhayashi1120/Emacs-wgrep
+Replaced by Phi-Grep
+#+BEGIN_SRC emacs-lisp
+  (use-package wgrep
+    :hook
+    (rg-mode . wgrep-rg-setup)
+    :custom
+    (wgrep-change-readonly-file t)
+    :config
+    (autoload 'wgrep-rg-setup "wgrep-rg"))
+#+END_SRC
+** Wttr.in
+Frontend for wttr.in
+https://github.com/bcbcarl/emacs-wttrin
+As of [2020-08-04 Di] the fix below is needed after installing. Recompile .el after applying. https://github.com/bcbcarl/emacs-wttrin/issues/16#issuecomment-658987903
+#+BEGIN_SRC emacs-lisp
+  (use-package wttrin
+    :commands
+    (wttrin)
+    :custom
+    (wttrin-default-cities '("Bielefeld" "Dusseldorf" "Hamburg" "Frankfurt" "Stuttgart" "Munchen" "Berlin"))
+    (wttrin-default-accept-language '("Accept-Language" . "de-DE")))
+#+END_SRC
+** Xah-find
+=Package went commercial.=
+#+BEGIN_SRC emacs-lisp
+  (use-package xah-find
+    :bind
+    (("s-x f" . xah-find-text)
+     ("s-x c" . xah-find-count)
+     ("s-x r" . xah-find-replace-text))
+    :custom-face
+    (xah-find-file-path-highlight ((t :background "#4169E1" :foreground "white")))
+    (xah-find-match-highlight ((t :background "#ff8c00" :foreground "white"))))
+#+END_SRC
+* Manual Packages
+** Searcheverything
+Eigene GUI ist besser.
+#+BEGIN_SRC emacs-lisp
+  (use-package searcheverything
+    :ensure nil
+    :custom
+    (searcheverything-cli-path "C:\\!Software\\Portable\\Searcheverything\\es.exe"))
+#+END_SRC
+* Configuration Snippets and Custom Functions
+** Cycle previous heading
+Function replaced by Ctrl-c Tab
+Collapse the current subtee
+#+BEGIN_SRC emacs-lisp
+ (defun my-org-cycle-previous-heading ()
+    (interactive)
+    (outline-previous-heading)
+    (org-cycle)
+    (recenter))
+#+END_SRC
+** DOS EOL-Removal
+#+BEGIN_SRC emacs-lisp
+  (defun my-dos-eol-removal ()
+    "Do not show ^M in files containing mixed UNIX and DOS line endings."
+    (interactive)
+    (setq buffer-display-table (make-display-table))
+    (aset buffer-display-table ?\^M []))
+#+END_SRC
+** Frames - Workaround for broken frameset restore
+Fixes the "Error (frameset): Font ‘tty’ is not defined" bug after Desktop restore, by deactivating.
+(Was not needed in years)
+#+BEGIN_SRC emacs-lisp
+  (setq desktop-restore-frames nil)
+#+END_SRC
+** Info
+(Replaced by INFOPATH Variable addition)
+#+BEGIN_SRC emacs-lisp
+  (defconst my-relative-directory-info-additional "c:/msys64/usr/share/info/")
+  (setq Info-additional-directory-list (list "~/info/" (symbol-value 'my-relative-directory-info-additional)))
+#+END_SRC
+** Key-Combinations
+(Was not needed in years)
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "H-p") "\C-q\C-l") ;Insert page-break ^L 
+  (global-set-key (kbd "H-c") "\C-a\C- \C-e\M-w\C-a") ;this is needed to copy a line to the clipboard
+  (global-set-key (kbd "<C-M-backspace>") "\C-a\C- \C-n") ;Copy line to Clipboard alternative
+#+END_SRC
+** My save whole line old version
+Replaced by new version.
+#+BEGIN_SRC emacs-lisp
+(defun my-save-whole-line ()
+  (interactive "p")
+  (save-excursion
+    (forward-visible-line 0)
+    (let ((start (point)))
+      (forward-visible-line 1)
+      (kill-new (buffer-substring start (point))))))
+#+END_SRC
+** Narrow or widen DWIM
+Not needed anymore, replaced by org-toggle-narrow-to-subtree
+#+BEGIN_SRC emacs-lisp
+(defun my-narrow-or-widen-dwim (p)
+  "If the buffer is narrowed, it widens. Otherwise, it narrows intelligently.
+Intelligently means: region, org-src-block, org-subtree, or defun,
+whichever applies first. Narrowing to org-src-block actually calls `org-edit-src-code'.
+With prefix P, don't widen, just narrow even if buffer is already narrowed."
+  (interactive "P")
+  (declare (interactive-only))
+  (cond ((and (buffer-narrowed-p) (not p)) (widen))
+        ((region-active-p)
+         (narrow-to-region (region-beginning) (region-end)))
+        ((derived-mode-p 'org-mode)
+         ;; `org-edit-src-code' is not a real narrowing command.
+         ;; Remove this first conditional if you don't want it.
+         (cond ((ignore-errors (org-edit-src-code))
+                (delete-other-windows))
+               ((org-at-block-p)
+                (org-narrow-to-block))
+               (t (org-narrow-to-subtree))))
+        (t (narrow-to-defun))))
+#+END_SRC
+** Remote-Connections
+*** Picocom
+#+BEGIN_SRC emacs-lisp
+(defun quick-serial-picocom (baud port)
+  "Connect to a remote host by Serial."
+  (interactive "sPort (default /dev/ttyS11 equals COM12): \nsBaud (default 9600): ")
+  (let* ((port (if (equal port "") "/dev/ttyS11" port))
+   (baud (if (equal baud "") "9600" baud))
+   (switches (list "-b" baud port)))
+   (set-buffer (apply 'make-term "serial" "picocom" nil switches))
+   (term-mode)
+   (term-char-mode)
+   (term-set-escape-char ?\C-x)
+   (switch-to-buffer "*serial*")))
+#+END_SRC
+*** Telnet
+#+BEGIN_SRC emacs-lisp
+   (defun quick-telnet-via-inetutils-telnet (host port)
+   "Connect to a remote host by Telnet."
+   (interactive "sHost: \nsPort (default 23): ")
+   (let* ((port (if (equal port "") "23" port))
+    (switches (list host port)))
+    (set-buffer (apply 'make-term "telnet" "telnet" nil switches))
+    (term-mode)
+    (term-char-mode)
+    (term-set-escape-char ?\C-x)
+    (switch-to-buffer "*telnet*")))
+#+END_SRC
+*** Serial via Plink
+#+BEGIN_SRC emacs-lisp
+(defun quick-serial-via-plink (port serconfig)
+  "Connect to a remote host by Serial."
+  (interactive "sPort (default COM12): \nsSerconfig (default 9600,8,1,n,X): ")
+  (let* ((port (if (equal port "") "COM12" port))
+   (serconfig (if (equal serconfig "") "9600,8,1,n,X" serconfig))
+   (switches (list "-serial" port "-sercfg" serconfig)))
+   (set-buffer (apply 'make-term "serial" "plink.exe" nil switches))
+   (term-mode)
+   (term-char-mode)
+   (term-set-escape-char ?\C-x)
+   (switch-to-buffer "*serial*")))
+#+END_SRC
+*** SSH-Openssh
+#+BEGIN_SRC emacs-lisp
+   (defun quick-ssh-via-openssh (user host port)
+   "Connect to a remote host by SSH."
+   (interactive "sUser: \nsHost: \nsPort (default 22): ")
+   (let* ((port (if (equal port "") "22" port))
+    (switches (list "-tt" host "-l" user "-p" port)))
+    (set-buffer (apply 'make-term "ssh" "ssh" nil switches))
+    (term-mode)
+    (term-char-mode)
+    (term-set-escape-char ?\C-x)
+    (switch-to-buffer "*ssh*")))
+#+END_SRC
+** Rlogin
+*** Terminal fixes
+**** enable cua and transient mark modes in term-line-mode
+#+BEGIN_SRC emacs-lisp
+  (defadvice term-line-mode (after term-line-mode-fixes ())
+    (set (make-local-variable 'cua-mode) t)
+    (set (make-local-variable 'transient-mark-mode) t))
+  (ad-activate 'term-line-mode)
+#+END_SRC
+**** disable cua and transient mark modes in term-char-mode
+#+BEGIN_SRC emacs-lisp
+  (defadvice term-char-mode (after term-char-mode-fixes ())
+    (set (make-local-variable 'cua-mode) nil)
+    (set (make-local-variable 'transient-mark-mode) nil))
+  (ad-activate 'term-char-mode)
+#+END_SRC
+*** Remote-Connect
+**** Remote-Term
+#+BEGIN_SRC emacs-lisp
+  (defun remote-term (new-buffer-name cmd &rest switches)
+    (setq term-ansi-buffer-name (concat "*" new-buffer-name "*"))
+    (setq term-ansi-buffer-name (generate-new-buffer-name term-ansi-buffer-name))
+    (setq term-ansi-buffer-name (apply 'make-term term-ansi-buffer-name cmd nil switches))
+    (set-buffer term-ansi-buffer-name)
+    (term-mode)
+    (term-char-mode)
+    (term-set-escape-char ?\C-x)
+    (switch-to-buffer term-ansi-buffer-name))
+#+END_SRC
+**** Remote Access
+#+BEGIN_SRC emacs-lisp
+  (defun reco-cust-dev ()
+    (interactive) 
+    (remote-term "Customer-Device" "ssh" "-tt" "root@192.168.89.11"))
+#+END_SRC
+*** Quick-Connect
+**** Quick SSH using ssh
+#+BEGIN_SRC emacs-lisp
+  (defun quick-ssh (user host port)
+    "Connect to a remote host by SSH."
+    (interactive "sUser: \nsHost: \nsPort (default 22): ")
+    (let* ((port (if (equal port "") "22" port))
+           (switches (list "-tt" host "-l" user "-p" port)))
+      (set-buffer (apply 'make-term "ssh" "ssh" nil switches))
+      (term-mode)
+      (term-char-mode)
+      (term-set-escape-char ?\C-x)
+      (switch-to-buffer "*ssh*")))
+#+END_SRC
+**** Quick Serial using plink
+#+BEGIN_SRC emacs-lisp
+  (defun quick-serial (port serconfig)
+    "Connect to a remote host by Serial. Plink Method"
+    (interactive "sPort (default COM12): \nsSerconfig (default 9600,8,1,n,X): ")
+    (let* ((port (if (equal port "") "COM12" port))
+           (serconfig (if (equal serconfig "") "9600,8,1,n,X" serconfig))
+           (switches (list "-serial" port "-sercfg" serconfig)))
+      (set-buffer (apply 'make-term "serial" "plink" nil switches))
+      (term-mode)
+      (term-char-mode)
+      (term-set-escape-char ?\C-x)
+      (switch-to-buffer "*serial*")))
+#+END_SRC
+* Installation Instructions
+** Configuring bash shell
+*** Edit /etc/bash.bashrc and add content below
+# Set Language
+export LANG="de_DE.utf8"
+export LC_ALL="de_DE.utf8"
+
+# Export Term Variable
+export TERM="cygwin"
+
+# Avoid duplicates
+export HISTCONTROL=ignoredups:erasedups
+
+# When the shell exits, append to the history file instead of overwriting it
+shopt -s histappend
+*** Bash Completion
+bash-completion
+** Cygwin extra Packages
+*** Printing - general
+cygutils-extra
+*** Printing - LATEX (when using Cygwin-Emacs)
+texlive texlive-collection-*
+*** PDF-Tools-Server Building (epdf)
+libpng-devel libzip-devel libpoppler-glib-devel libpoppler-devel
+*** Editor (when using Cygwin-Emacs)
+emacs emacs-w32
+*** Editor for emergency cases
+vim
+*** Picture-Displaying
+libpng16 libtiff6 libjpeg8 libxpm4 librsvg2_2 libgif4
+*** Picture-Manipulation for pdf-tools
+imagemagick
+*** Compression
+zlib
+*** XML
+libxml2
+*** Encryption
+libgnutls28 gnutls
+*** SSH
+openssh
+*** Compiling (for picocom and pdf-tools)
+gcc-g++ gdb make automake autoconf
+*** Network utilities (ping, traceroute, telnet, etc.)
+inetutils
+** CygwinW32
+(Replaced by NT-Emacs)
+*** Shortcuts
+Z:\Tools\cygwin64\bin\run.exe emacs-w32
+Z:\Tools\cygwin64\bin\run.exe emacs-w32 -debug-init
+Z:\Tools\Emacs\bin\runemacs.exe
+Z:\Tools\Emacs\bin\runemacs.exe -debug-init
+*** Registry
+Windows Registry Editor Version 5.00
+
+;Registering Variables for the Emacs-Client to find the server and launch the Full-App if none is running
+;========================================================================================================
+[HKEY_CURRENT_USER\Environment]
+"ALTERNATE_EDITOR"="/bin/emacs-w32"
+"EMACS_SERVER_FILE"="/home/jlange/.emacs.d/server/main_server"
+
+;Registering Emacs and Emacsclient Applications
+;==============================================
+[HKEY_CLASSES_ROOT\Applications\emacsclient-w32.exe\shell\open\command]
+@="\"Z:\\Tools\\cygwin64\\bin\\emacsclient-w32.exe\" -n \"%L\""
+
+[HKEY_CLASSES_ROOT\Applications\emacs-w32.exe\shell\open\command]
+@="\"Z:\\Tools\\cygwin64\\bin\\emacs-w32.exe\" \"%L\""
+
+;Registering the "Edit with Emacs"" Shell-Extension to open unregistered file-extensions via Context-Menu
+;========================================================================================================
+[HKEY_CLASSES_ROOT\*\shell\openWithEmacs]
+@="&Edit with Emacs"
+
+[HKEY_CLASSES_ROOT\*\shell\openWithEmacs\command]
+@="\"Z:\\Tools\\cygwin64\\bin\\run.exe\" emacsclient-w32 -n \"%L\""
+
+;Registering the Emacs-File-Type and associate Icon and Application to open it with it
+;=====================================================================================
+[HKEY_CLASSES_ROOT\EmacsFile]
+@="EmacsFile"
+
+[HKEY_CLASSES_ROOT\EmacsFile\DefaultIcon]
+@="Z:\\Tools\\cygwin64\\bin\\emacs.ico,0"
+
+[HKEY_CLASSES_ROOT\EmacsFile\shell\open]
+@="Open in Emacs"
+
+[HKEY_CLASSES_ROOT\EmacsFile\shell\open\command]
+@="\"Z:\\Tools\\cygwin64\\bin\\run.exe\" emacsclient-w32 -n \"%L\""
+
+;Registering the .el and .org Files as Emacs-Files
+;=========================================
+[HKEY_CLASSES_ROOT\.el]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+
+[HKEY_CLASSES_ROOT\.org]
+@="EmacsFile"
+"Content Type"="text/plain"
+"PerceivedType"="text"
+** Fontawesome-Font
+(Removed due to slowdowns, Unicode mostly sufficient)
+*** Purpose and General-Information
+- Better Symbol Support outside of Unicode
+*** Download and installation
+- Source http://fontawesome.io/
+- Extract and install in C:\Windows\Fonts
+** Git for Windows
+*** Purpose and General-Information
+This is a (more-or-less) native version of Git. If you use the MSYS2 version you will get errors when compiling magit.
+*** Download and Installation
+Download Installer from https://git-scm.com/downloads
+** Gnuplot
+*** Purpose and General-Information
+Ability to create graphs from data as file or directly to display.
+*** Download and Installation
+- Download Portable version from https://sourceforge.net/projects/gnuplot/files/gnuplot/
+- Add Path to User-PATH
+- Download both gnuplot and gnuplot-mode from melpa. See instructions in config file for gnuplot.
+** Graphviz
+*** Purpose and General-Information
+- Required for org-mind-map
+*** Download and Installation
+- http://graphviz.org/Download_windows.php
+- Download graphviz-X.XX.msi
+- Install executable under .../Graphviz/ not /.../GraphvizX.XX//
+- add ...\Graphviz\bin to your PATH variable
+C:\Program Files (x86)\Graphviz\bin\
+** Hunspell
+To correct mistakes copy hunspell.zip contents to Z:\Tools\cygwin64\usr\share\hunspell (Adjust to your installation)
+For manual arrangment of the Dictionaries:
+Latest German Dictionary from http://extensions.libreoffice.org/extension-center/german-de-de-frami-dictionaries/releases/
+Latest French Dictionary from http://extensions.libreoffice.org/extension-center/dictionnaires-francais/
+Latest American/British-English Dictionary from http://extensions.libreoffice.org/extension-center/american-british-canadian-spelling-hyphen-thesaurus-dictionaries/releases/
+Move .dic + .aff File to (YourHunspellDirectory)\share\hunspell and rename to de_DE.aff, de_DE.dic, fr_FR.aff, fr_FR.dic
+Create personal dictionary file as stated below in (YourHunspellDirectory)\share\hunspell
+Load hunspell in cygwin, add hunspell/bin to PATH
+** ImageMagick
+*** Purpose and General-Information
+- Allows Image Dired Thumbnail Mode to work
+*** Download and installation
+- Do NOT download ImageMagick 7.X since it is not yet supported in Emacs. 6.X is still supported by ImageMagick. Unofficial Emax64 contains ImageMagick 7.
+- Source https://www.imagemagick.org/download/binaries/ImageMagick-6.9.X-X-Q16-x64-dll.exe
+- Install without any options, except adding path the System PATH
+** Picocom
+(Does not work reliable)
+*** Purpose and General-Information
+- Serial-Communication inside emacs
+*** Download and installation
+- Source https://github.com/npat-efault/picocom/releases Create directory (Your-Cygwin-Home)/usr/tmp/Picocom-Source/ Download and extract files to it.
+- See Cygwin configuration notes regarding compiling and installing.
+*** Compile and Install Picocom
+**** Add installation commands to picocom source makefile
+Vi /usr/tmp/Picocom-Source/makefile and add
+install: picocom
+install -D -s picocom $(PREFIX)/usr/local/bin/picocom
+**** Execute following commands in cygwin terminal
+cd /usr/tmp/Picocom-Source/
+make clean && make && make install
+** Texlive
+(Replaced by Mictex)
+**** Purpose and General-Information
+- Tex-Environment required in order to process latex produced by org mode and other packages.
+**** Download and Installation
+- http://www.tug.org/texlive/acquire-netinstall.html
+- Download install-tl-windows.exe
+- Select Full-Install, it will take around 2h and takes up to 4GB
+- Currently can't tell what is needed and what not, Full-Install will always work.
+- Download curl in order to get the skript "getnonfreefonts" for Texlive to work
+***** Commands
+pacman -S diffutils
+pacman -S tmux
+pacman -S git
+pacman -S curl
+pacman -S mingw-w64-x86_64-ag
+pacman -S mingw-w64-x86_64-aspell-de
+pacman -S mingw-w64-x86_64-aspell-en
+
+Add to path (Change to your installation):
+C:\msys64\mingw64\bin;C:\msys64\usr\bin
+
+Add --e 'C:\!Data\home\jlange\start-tmux.sh' to msys2_shell.cmd block :startmintty
+* Other Snippets
+** Auctex alternative Workflow
+As workflow compile once and open .dvi (instead of pdf) in doc-mode in other window. This avoids the file-lock problem of pdfs on windows and allow an automatic update of the dvi file when recompiling. When the latex file is finished export to pdf.
+Change this (TeX-global-PDF-mode -1) to (TeX-global-PDF-mode) to enable Latex compiling to pdf intstead of dvi.
+** Compile pdf-tools example successful output
+-*- mode: compilation; default-directory: "/usr/bin/" -*-
+Compilation started at Thu May 26 06:20:25
+
+make V=0 -kC '/cygdrive/c/Users/jlange/AppData/Roaming/.emacs.d/elpa/pdf-tools-20160525.920/build'  melpa-build
+make: Entering directory '/cygdrive/c/Users/jlange/AppData/Roaming/.emacs.d/elpa/pdf-tools-20160525.920/build'
+cd server && ./autogen.sh
+Running autoreconf...
+Unescaped left brace in regex is deprecated, passed through in regex; marked by <-- HERE in m/\${ <-- HERE ([^ \t=:+{}]+)}/ at /usr/bin/automake-1.14 line 3930.
+configure.ac:15: installing './ar-lib'
+configure.ac:11: installing './compile'
+configure.ac:6: installing './install-sh'
+configure.ac:6: installing './missing'
+Makefile.am: installing './depcomp'
+cd server && ./configure -q
+
+Is case-sensitive searching enabled ?     yes
+Is modifying text annotations enabled ?   yes
+Is modifying markup annotations enabled ? yes
+
+make -C server
+make[1]: Entering directory '/cygdrive/c/Users/jlange/AppData/Roaming/.emacs.d/elpa/pdf-tools-20160525.920/build/server'
+make  all-am
+make[2]: Entering directory '/cygdrive/c/Users/jlange/AppData/Roaming/.emacs.d/elpa/pdf-tools-20160525.920/build/server'
+  CC       libsynctex_a-synctex_parser.o
+  CC       libsynctex_a-synctex_parser_utils.o
+  AR       libsynctex.a
+  CC       epdfinfo-epdfinfo.o
+  CXX      epdfinfo-poppler-hack.o
+  CXXLD    epdfinfo.exe
+make[2]: Leaving directory '/cygdrive/c/Users/jlange/AppData/Roaming/.emacs.d/elpa/pdf-tools-20160525.920/build/server'
+make[1]: Leaving directory '/cygdrive/c/Users/jlange/AppData/Roaming/.emacs.d/elpa/pdf-tools-20160525.920/build/server'
+cp -p server/epdfinfo ..
+make distclean
+make[1]: Entering directory '/cygdrive/c/Users/jlange/AppData/Roaming/.emacs.d/elpa/pdf-tools-20160525.920/build'
+rm -rf -- pdf-tools-0.70
+rm -f -- pdf-tools-0.70.tar
+rm -f -- lisp/*.elc
+! [ -f server/Makefile ] || make -C server clean
+make[2]: Entering directory '/cygdrive/c/Users/jlange/AppData/Roaming/.emacs.d/elpa/pdf-tools-20160525.920/build/server'
+test -z "epdfinfo.exe" || rm -f epdfinfo.exe
+test -z "libsynctex.a" || rm -f libsynctex.a
+rm -f *.o
+make[2]: Leaving directory '/cygdrive/c/Users/jlange/AppData/Roaming/.emacs.d/elpa/pdf-tools-20160525.920/build/server'
+rm -rf .cask
+! [ -f server/Makefile ] || make -C server distclean
+make[2]: Entering directory '/cygdrive/c/Users/jlange/AppData/Roaming/.emacs.d/elpa/pdf-tools-20160525.920/build/server'
+test -z "epdfinfo.exe" || rm -f epdfinfo.exe
+test -z "libsynctex.a" || rm -f libsynctex.a
+rm -f *.o
+rm -f *.tab.c
+test -z "" || rm -f 
+test . = "." || test -z "" || rm -f 
+rm -f config.h stamp-h1
+rm -rf -- Makefile.in aclocal.m4 config.h.in configure depcomp install-sh missing autom4te.cache epdfinfo-0.70.tar.gz
+rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
+rm -f cscope.out cscope.in.out cscope.po.out cscope.files
+rm -f config.status config.cache config.log configure.lineno config.status.lineno
+rm -rf ./.deps
+rm -f Makefile
+make[2]: Leaving directory '/cygdrive/c/Users/jlange/AppData/Roaming/.emacs.d/elpa/pdf-tools-20160525.920/build/server'
+make[1]: Leaving directory '/cygdrive/c/Users/jlange/AppData/Roaming/.emacs.d/elpa/pdf-tools-20160525.920/build'
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Server successfully build. 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+make: Leaving directory '/cygdrive/c/Users/jlange/AppData/Roaming/.emacs.d/elpa/pdf-tools-20160525.920/build'
+
+Compilation finished at Thu May 26 06:22:25
+** CPP Clearscreen using system
+void clrscr() {
+   system("cls");  //Bildschirm reinigen
+}
+** MergeCFG2ORG.bat
+#+BEGIN_SRC shell
+  for %%* in (.) do (echo * %%~nx* >> output.org)
+                    for /r %%i in (*.txt) (*.cfg) do
+                                          (if not %%~nxi == output.org
+                                              (
+                                                  echo ** %%~nxi >> output.org
+                                                  type "%%i" >> output.org
+                                                  echo . >> output.org
+                                              )
+                                          )
+#+END_SRC
+** Nice colours
+#+BEGIN_SRC emacs-lisp
+#111111
+#464740
+#222222
+#333399
+#ffec8b
+#ff6666
+red
+#+END_SRC
+** V-Card Example Max Mustermann
+BEGIN:VCARD
+VERSION:2.1
+N:Mustermann;Max;;Herr
+FN:Max Mustermann
+TITLE:Administrator
+TEL;CELL:+49 (123) 987654321
+TEL;WORK;VOICE:+49 (123) 654321
+TEL;HOME;VOICE:+49 (123) 123456
+TEL;WORK;FAX:+49 (123) 1234 - 4321
+EMAIL;WORK;INTERNET:max.mustermann@musterfirma.org
+EMAIL;HOME;INTERNET:max.mustermann@mailanbieter.org
+URL;WORK:http://example.com
+ADR:;;Musterstrasse 123;Musterstadt;;12345;Germany
+ORG:Musterfirma;Musterabteilung
+NOTE:Bla
+X-MS-OL-DEFAULT-POSTAL-ADDRESS:2
+END:VCARD
